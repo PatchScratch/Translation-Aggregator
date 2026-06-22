@@ -1,0 +1,4 @@
+requests>=2.28
+httpx>=0.24
+PyQt6>=6.5; extra == 'gui'
+mecab-python3>=1.0; extra == 'mecab'

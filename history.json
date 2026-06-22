@@ -1,0 +1,789 @@
+[
+  {
+    "ts": 1781977043.5056067,
+    "src": "ja",
+    "dst": "en",
+    "orig": "次の話は近いうちに公開します。",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "The next story will be published soon.",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "",
+        "error": "Client error '401 Unauthorized' for url 'https://www.bing.com/ttranslatev3?isVertical=1&=&IG=8C669349C16C4FF3AD9DE6A0DE253A50&IID=translator.5023.0'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+      },
+      {
+        "translator": "DeepL",
+        "text": "",
+        "error": "Client error '429 Too Many Requests' for url 'https://www2.deepl.com/jsonrpc'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "次\tツギ\tツギ\t次\t名詞-普通名詞-一般\t\t\t2\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\n話\tハナシ\tハナシ\t話\t名詞-普通名詞-サ変可能\t\t\t3\nは\tワ\tハ\tは\t助詞-係助詞\t\t\t\n近い\tチカイ\tチカイ\t近い\t形容詞-一般\t形容詞\t連体形-一般\t2\nうち\tウチ\tウチ\t内\t名詞-普通名詞-副詞可能\t\t\t0\nに\tニ\tニ\tに\t助詞-格助詞\t\t\t\n公開\tコーカイ\tコウカイ\t公開\t名詞-普通名詞-サ変可能\t\t\t0\nし\tシ\tスル\t為る\t動詞-非自立可能\tサ行変格\t連用形-一般\t0\nます\tマス\tマス\tます\t助動詞\t助動詞-マス\t終止形-一般\t\n。\t\t\t。\t補助記号-句点\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1781977097.7360988,
+    "src": "ja",
+    "dst": "en",
+    "orig": "「あ、ご挨拶のタオルです」",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "“Ah, this is a greeting towel.”",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "",
+        "error": "Client error '401 Unauthorized' for url 'https://www.bing.com/ttranslatev3?isVertical=1&=&IG=8C669349C16C4FF3AD9DE6A0DE253A50&IID=translator.5023.1'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+      },
+      {
+        "translator": "DeepL",
+        "text": "",
+        "error": "Client error '429 Too Many Requests' for url 'https://www2.deepl.com/jsonrpc'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "「\t\t\t「\t補助記号-括弧開\t\t\t\nあ\tア\tアッ\tあっ\t感動詞-一般\t\t\t1\n、\t\t\t、\t補助記号-読点\t\t\t\nご\tゴ\tゴ\t御\t接頭辞\t\t\t\n挨拶\tアイサツ\tアイサツ\t挨拶\t名詞-普通名詞-サ変可能\t\t\t1\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\nタオル\tタオル\tタオル\tタオル-towel\t名詞-普通名詞-一般\t\t\t1\nです\tデス\tデス\tです\t助動詞\t助動詞-デス\t終止形-一般\t\n」\t\t\t」\t補助記号-括弧閉\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1781977105.8860087,
+    "src": "ja",
+    "dst": "en",
+    "orig": "「あ、ご挨拶のタオルです」",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "“Ah, this is a greeting towel.”",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "",
+        "error": "Client error '401 Unauthorized' for url 'https://www.bing.com/ttranslatev3?isVertical=1&=&IG=8C669349C16C4FF3AD9DE6A0DE253A50&IID=translator.5023.2'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+      },
+      {
+        "translator": "DeepL",
+        "text": "",
+        "error": "Client error '429 Too Many Requests' for url 'https://www2.deepl.com/jsonrpc'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "「\t\t\t「\t補助記号-括弧開\t\t\t\nあ\tア\tアッ\tあっ\t感動詞-一般\t\t\t1\n、\t\t\t、\t補助記号-読点\t\t\t\nご\tゴ\tゴ\t御\t接頭辞\t\t\t\n挨拶\tアイサツ\tアイサツ\t挨拶\t名詞-普通名詞-サ変可能\t\t\t1\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\nタオル\tタオル\tタオル\tタオル-towel\t名詞-普通名詞-一般\t\t\t1\nです\tデス\tデス\tです\t助動詞\t助動詞-デス\t終止形-一般\t\n」\t\t\t」\t補助記号-括弧閉\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1781977899.3974755,
+    "src": "ja",
+    "dst": "en",
+    "orig": "「あ、ご挨拶のタオルです」",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "“Ah, this is a greeting towel.”",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "Ah, this is a greeting towel.",
+        "error": null
+      },
+      {
+        "translator": "DeepL",
+        "text": "",
+        "error": "Client error '429 Too Many Requests' for url 'https://www2.deepl.com/jsonrpc'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+      },
+      {
+        "translator": "Baidu",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "「\t\t\t「\t補助記号-括弧開\t\t\t\nあ\tア\tアッ\tあっ\t感動詞-一般\t\t\t1\n、\t\t\t、\t補助記号-読点\t\t\t\nご\tゴ\tゴ\t御\t接頭辞\t\t\t\n挨拶\tアイサツ\tアイサツ\t挨拶\t名詞-普通名詞-サ変可能\t\t\t1\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\nタオル\tタオル\tタオル\tタオル-towel\t名詞-普通名詞-一般\t\t\t1\nです\tデス\tデス\tです\t助動詞\t助動詞-デス\t終止形-一般\t\n」\t\t\t」\t補助記号-括弧閉\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1781983575.1875782,
+    "src": "ja",
+    "dst": "en",
+    "orig": "「あ、ご挨拶のタオルです」",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "“Ah, this is a greeting towel.”",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "Ah, this is a greeting towel.",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "\"Ah, this is the towel for greetings.\"\n编辑译文\n段落对照\n笔记",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "「\t\t\t「\t補助記号-括弧開\t\t\t\nあ\tア\tアッ\tあっ\t感動詞-一般\t\t\t1\n、\t\t\t、\t補助記号-読点\t\t\t\nご\tゴ\tゴ\t御\t接頭辞\t\t\t\n挨拶\tアイサツ\tアイサツ\t挨拶\t名詞-普通名詞-サ変可能\t\t\t1\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\nタオル\tタオル\tタオル\tタオル-towel\t名詞-普通名詞-一般\t\t\t1\nです\tデス\tデス\tです\t助動詞\t助動詞-デス\t終止形-一般\t\n」\t\t\t」\t補助記号-括弧閉\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1781984171.3855896,
+    "src": "ja",
+    "dst": "en",
+    "orig": "「あ、ご挨拶のタオルです」",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "“Ah, this is a greeting towel.”",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "Ah, this is a greeting towel.",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "\"Ah, this is the greeting towel.\"\n编辑译文\n段落对照\n笔记",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "「\t\t\t「\t補助記号-括弧開\t\t\t\nあ\tア\tアッ\tあっ\t感動詞-一般\t\t\t1\n、\t\t\t、\t補助記号-読点\t\t\t\nご\tゴ\tゴ\t御\t接頭辞\t\t\t\n挨拶\tアイサツ\tアイサツ\t挨拶\t名詞-普通名詞-サ変可能\t\t\t1\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\nタオル\tタオル\tタオル\tタオル-towel\t名詞-普通名詞-一般\t\t\t1\nです\tデス\tデス\tです\t助動詞\t助動詞-デス\t終止形-一般\t\n」\t\t\t」\t補助記号-括弧閉\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1781984240.9442334,
+    "src": "ja",
+    "dst": "en",
+    "orig": "「あ、ご挨拶のタオルです」",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "“Ah, this is a greeting towel.”",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "Ah, this is a greeting towel.",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "\"Ah, it's the greeting towel.\"\n编辑译文\n段落对照\n笔记",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "「\t\t\t「\t補助記号-括弧開\t\t\t\nあ\tア\tアッ\tあっ\t感動詞-一般\t\t\t1\n、\t\t\t、\t補助記号-読点\t\t\t\nご\tゴ\tゴ\t御\t接頭辞\t\t\t\n挨拶\tアイサツ\tアイサツ\t挨拶\t名詞-普通名詞-サ変可能\t\t\t1\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\nタオル\tタオル\tタオル\tタオル-towel\t名詞-普通名詞-一般\t\t\t1\nです\tデス\tデス\tです\t助動詞\t助動詞-デス\t終止形-一般\t\n」\t\t\t」\t補助記号-括弧閉\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782017690.7278483,
+    "src": "ja",
+    "dst": "en",
+    "orig": "こんにちは",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "Hello",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "Hello",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "Hello\n编辑译文\n段落对照\n笔记",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "こんにちは\tコンニチワ\tコンニチハ\t今日は\t感動詞-一般\t\t\t5\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782017781.6467986,
+    "src": "ja",
+    "dst": "en",
+    "orig": "ありがとう",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "thank you",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "Thank you",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "Thank you.\n编辑译文\n段落对照\n笔记\n以上为AI翻译结果",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "ありがとう\tアリガトー\tアリガトウ\t有り難う\t感動詞-一般\t\t\t2\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782017825.030063,
+    "src": "ja",
+    "dst": "en",
+    "orig": "こんにちは世界",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "Hello World",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "Hello, world",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "Hello, world.\n编辑译文\n段落对照\n笔记",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "こんにちは\tコンニチワ\tコンニチハ\t今日は\t感動詞-一般\t\t\t5\n世界\tセカイ\tセカイ\t世界\t名詞-普通名詞-一般\t\t\t1,2\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782018074.7919545,
+    "src": "ja",
+    "dst": "en",
+    "orig": "ありがとう",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "thank you",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "Thank you",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "Thank you.\n编辑译文\n段落对照\n笔记\n以上为AI翻译结果",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "ありがとう\tアリガトー\tアリガトウ\t有り難う\t感動詞-一般\t\t\t2\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782018136.5783403,
+    "src": "ja",
+    "dst": "en",
+    "orig": "hello",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "hello",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "hello",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "Hello\n编辑译文\n段落对照\n笔记",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "hello\thello\thello\thello\t名詞-普通名詞-一般\t\t\t0\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782018190.8139386,
+    "src": "ja",
+    "dst": "en",
+    "orig": "次の話は近いうちに公開します。",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "The next story will be published soon.",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "The next story will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "The next episode will be released soon.\n编辑译文\n段落对照\n笔记",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "次\tツギ\tツギ\t次\t名詞-普通名詞-一般\t\t\t2\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\n話\tハナシ\tハナシ\t話\t名詞-普通名詞-サ変可能\t\t\t3\nは\tワ\tハ\tは\t助詞-係助詞\t\t\t\n近い\tチカイ\tチカイ\t近い\t形容詞-一般\t形容詞\t連体形-一般\t2\nうち\tウチ\tウチ\t内\t名詞-普通名詞-副詞可能\t\t\t0\nに\tニ\tニ\tに\t助詞-格助詞\t\t\t\n公開\tコーカイ\tコウカイ\t公開\t名詞-普通名詞-サ変可能\t\t\t0\nし\tシ\tスル\t為る\t動詞-非自立可能\tサ行変格\t連用形-一般\t0\nます\tマス\tマス\tます\t助動詞\t助動詞-マス\t終止形-一般\t\n。\t\t\t。\t補助記号-句点\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782031452.7929442,
+    "src": "ja",
+    "dst": "en",
+    "orig": "次の話は近いうちに公開します。",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "The next story will be published soon.",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "The next story will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "The next episode will be released soon.\n编辑译文\n段落对照\n笔记",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "い [い]  /(ctr) (1) rank/place (e.g. first place)/(ctr) (2) decimal place/(ctr) (3) counter for ghosts/(P)/EntL2068010X\nい [い]  /(ctr) (1) rank/place (e.g. first place)/(ctr) (2) decimal place/(ctr) (3) counter for ghosts/(P)/EntL2068010X\nし [し]  /(suf) (1) (hon) Mr/Mrs/Ms/Miss/(n,suf) (2) clan/(pn) (3) (hon) he/him/(ctr) (4) (hon) counter for people/(P)/EntL210113\n点 [てん]  /(n) (1) dot/spot/point/speck/mark/(n) (2) mark (in an exam, etc.)/grade/score/points/(n) (3) point (in a game)/score/go\nす [す]  /(suf) (arch) (hon) honorific (or familiar) suffix used after a name/EntL2427540\nす [す]  /(suf) (arch) (hon) honorific (or familiar) suffix used after a name/EntL2427540\n次 [じ]  /(pref) (1) next/(pref) (2) (See 次亜) hypo- (i.e. containing an element with low valence)/(ctr) (3) order/sequence/time/t\n次 [じ]  /(pref) (1) next/(pref) (2) (See 次亜) hypo- (i.e. containing an element with low valence)/(ctr) (3) order/sequence/time/t\n話 [わ]  /(ctr) counter for stories, episodes of TV series, etc./EntL2100460\n話 [わ]  /(ctr) counter for stories, episodes of TV series, etc./EntL2100460\nは [は]  /(ctr) counter for waves (of a repeated occurrence)/EntL2844141\nは [は]  /(ctr) counter for waves (of a repeated occurrence)/EntL2844141\n体 [たい]  /(n,n-suf) (1) body/physique/posture/(n,n-suf) (2) shape/form/style/(n,n-suf) (3) substance/identity/reality/(n,n-suf) (\n形 [けい]  /(suf) (1) form/(n) (2) (abbr) {gramm} (part of speech tag used in dictionaries) (See 形容詞) adjective/i-adjective (in Jap\nち [ち]  /(suf) (col) (uk) (See ん家) 's house/'s home/EntL2858378\nに [に]  /(suf) looking like (someone)/taking after (either of one's parents)/EntL1314550X\nに [に]  /(suf) looking like (someone)/taking after (either of one's parents)/EntL1314550X\nる [る]  /(suf) (col) (as in ググる, ミスる, etc.) verb-forming suffix/EntL2849996\n行 [こう]  /(n,n-suf) (1) going/travelling/traveling/journey/trip/(n) (2) act/action/(n-suf) (3) bank/(ctr) (4) counter for banks/(\n形 [けい]  /(suf) (1) form/(n) (2) (abbr) {gramm} (part of speech tag used in dictionaries) (See 形容詞) adjective/i-adjective (in Jap\n形 [けい]  /(suf) (1) form/(n) (2) (abbr) {gramm} (part of speech tag used in dictionaries) (See 形容詞) adjective/i-adjective (in Jap\nうち [うち]  /(n,adv) (1) inside/within/(n,adv) (2) (uk) while (e.g. one is young)/during/within (e.g. a day)/in the course of/(n,adv\n形容詞 [けいようし]  /(n) {gramm} adjective/i-adjective (in Japanese)/(P)/EntL1250430X\n形容詞 [けいようし]  /(n) {gramm} adjective/i-adjective (in Japanese)/(P)/EntL1250430X\n名詞 [めいし(P);なことば(ok)]  /(n) {gramm} noun/(P)/EntL1531570X\n名詞 [めいし(P);なことば(ok)]  /(n) {gramm} noun/(P)/EntL1531570X\n一般 [いっぱん]  /(adj-no,n) (1) general/universal/(adj-no,n) (2) (ant: 特殊) ordinary/average/common/non-celebrity/(adj-no,n) (3) (arch) t\n助詞 [じょし]  /(n) {gramm} particle/postpositional word in Japanese grammar that functions as an auxiliary to a main word/(P)/EntL1344\n助詞 [じょし]  /(n) {gramm} particle/postpositional word in Japanese grammar that functions as an auxiliary to a main word/(P)/EntL1344\n名詞 [めいし(P);なことば(ok)]  /(n) {gramm} noun/(P)/EntL1531570X",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "次\tツギ\tツギ\t次\t名詞-普通名詞-一般\t\t\t2\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\n話\tハナシ\tハナシ\t話\t名詞-普通名詞-サ変可能\t\t\t3\nは\tワ\tハ\tは\t助詞-係助詞\t\t\t\n近い\tチカイ\tチカイ\t近い\t形容詞-一般\t形容詞\t連体形-一般\t2\nうち\tウチ\tウチ\t内\t名詞-普通名詞-副詞可能\t\t\t0\nに\tニ\tニ\tに\t助詞-格助詞\t\t\t\n公開\tコーカイ\tコウカイ\t公開\t名詞-普通名詞-サ変可能\t\t\t0\nし\tシ\tスル\t為る\t動詞-非自立可能\tサ行変格\t連用形-一般\t0\nます\tマス\tマス\tます\t助動詞\t助動詞-マス\t終止形-一般\t\n。\t\t\t。\t補助記号-句点\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782033419.8307283,
+    "src": "ja",
+    "dst": "en",
+    "orig": "次の話は近いうちに公開します。",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "The next story will be published soon.",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "The next story will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "The next episode will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "い [i]  /(ctr) (1) rank/place (e.g. first place)/(ctr) (2) decimal place/(ctr) (3) counter for ghosts/(P)/EntL2068010X\nい [i]  /(ctr) (1) rank/place (e.g. first place)/(ctr) (2) decimal place/(ctr) (3) counter for ghosts/(P)/EntL2068010X\nし [shi]  /(suf) (1) (hon) Mr/Mrs/Ms/Miss/(n,suf) (2) clan/(pn) (3) (hon) he/him/(ctr) (4) (hon) counter for people/(P)/EntL210113\n点 [ten]  /(n) (1) dot/spot/point/speck/mark/(n) (2) mark (in an exam, etc.)/grade/score/points/(n) (3) point (in a game)/score/go\nす [su]  /(suf) (arch) (hon) honorific (or familiar) suffix used after a name/EntL2427540\nす [su]  /(suf) (arch) (hon) honorific (or familiar) suffix used after a name/EntL2427540\n次 [ji]  /(pref) (1) next/(pref) (2) (See 次亜) hypo- (i.e. containing an element with low valence)/(ctr) (3) order/sequence/time/t\n次 [ji]  /(pref) (1) next/(pref) (2) (See 次亜) hypo- (i.e. containing an element with low valence)/(ctr) (3) order/sequence/time/t\n話 [wa]  /(ctr) counter for stories, episodes of TV series, etc./EntL2100460\n話 [wa]  /(ctr) counter for stories, episodes of TV series, etc./EntL2100460\nは [ha]  /(ctr) counter for waves (of a repeated occurrence)/EntL2844141\nは [ha]  /(ctr) counter for waves (of a repeated occurrence)/EntL2844141\n体 [tai]  /(n,n-suf) (1) body/physique/posture/(n,n-suf) (2) shape/form/style/(n,n-suf) (3) substance/identity/reality/(n,n-suf) (\n形 [kei]  /(suf) (1) form/(n) (2) (abbr) {gramm} (part of speech tag used in dictionaries) (See 形容詞) adjective/i-adjective (in Jap\nち [chi]  /(suf) (col) (uk) (See ん家) 's house/'s home/EntL2858378\nに [ni]  /(suf) looking like (someone)/taking after (either of one's parents)/EntL1314550X\nに [ni]  /(suf) looking like (someone)/taking after (either of one's parents)/EntL1314550X\nる [ru]  /(suf) (col) (as in ググる, ミスる, etc.) verb-forming suffix/EntL2849996\n行 [kou]  /(n,n-suf) (1) going/travelling/traveling/journey/trip/(n) (2) act/action/(n-suf) (3) bank/(ctr) (4) counter for banks/(\n形 [kei]  /(suf) (1) form/(n) (2) (abbr) {gramm} (part of speech tag used in dictionaries) (See 形容詞) adjective/i-adjective (in Jap\n形 [kei]  /(suf) (1) form/(n) (2) (abbr) {gramm} (part of speech tag used in dictionaries) (See 形容詞) adjective/i-adjective (in Jap\nうち [uchi]  /(n,adv) (1) inside/within/(n,adv) (2) (uk) while (e.g. one is young)/during/within (e.g. a day)/in the course of/(n,adv\n形容詞 [keiyoushi]  /(n) {gramm} adjective/i-adjective (in Japanese)/(P)/EntL1250430X\n形容詞 [keiyoushi]  /(n) {gramm} adjective/i-adjective (in Japanese)/(P)/EntL1250430X\n名詞 [meishi(P);nakotoba(ok)]  /(n) {gramm} noun/(P)/EntL1531570X\n名詞 [meishi(P);nakotoba(ok)]  /(n) {gramm} noun/(P)/EntL1531570X\n一般 [ippan]  /(adj-no,n) (1) general/universal/(adj-no,n) (2) (ant: 特殊) ordinary/average/common/non-celebrity/(adj-no,n) (3) (arch) t\n助詞 [joshi]  /(n) {gramm} particle/postpositional word in Japanese grammar that functions as an auxiliary to a main word/(P)/EntL1344\n助詞 [joshi]  /(n) {gramm} particle/postpositional word in Japanese grammar that functions as an auxiliary to a main word/(P)/EntL1344\n名詞 [meishi(P);nakotoba(ok)]  /(n) {gramm} noun/(P)/EntL1531570X",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "次\tツギ\tツギ\t次\t名詞-普通名詞-一般\t\t\t2\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\n話\tハナシ\tハナシ\t話\t名詞-普通名詞-サ変可能\t\t\t3\nは\tワ\tハ\tは\t助詞-係助詞\t\t\t\n近い\tチカイ\tチカイ\t近い\t形容詞-一般\t形容詞\t連体形-一般\t2\nうち\tウチ\tウチ\t内\t名詞-普通名詞-副詞可能\t\t\t0\nに\tニ\tニ\tに\t助詞-格助詞\t\t\t\n公開\tコーカイ\tコウカイ\t公開\t名詞-普通名詞-サ変可能\t\t\t0\nし\tシ\tスル\t為る\t動詞-非自立可能\tサ行変格\t連用形-一般\t0\nます\tマス\tマス\tます\t助動詞\t助動詞-マス\t終止形-一般\t\n。\t\t\t。\t補助記号-句点\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782043437.3503418,
+    "src": "ja",
+    "dst": "en",
+    "orig": "次の話は近いうちに公開します。",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "The next story will be published soon.",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "The next story will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "The next episode will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "い [i]  /(ctr) (1) rank/place (e.g. first place)/(ctr) (2) decimal place/(ctr) (3) counter for ghosts/(P)/EntL2068010X\nい [i]  /(ctr) (1) rank/place (e.g. first place)/(ctr) (2) decimal place/(ctr) (3) counter for ghosts/(P)/EntL2068010X\nし [shi]  /(suf) (1) (hon) Mr/Mrs/Ms/Miss/(n,suf) (2) clan/(pn) (3) (hon) he/him/(ctr) (4) (hon) counter for people/(P)/EntL210113\n点 [ten]  /(n) (1) dot/spot/point/speck/mark/(n) (2) mark (in an exam, etc.)/grade/score/points/(n) (3) point (in a game)/score/go\nす [su]  /(suf) (arch) (hon) honorific (or familiar) suffix used after a name/EntL2427540\nす [su]  /(suf) (arch) (hon) honorific (or familiar) suffix used after a name/EntL2427540\n次 [ji]  /(pref) (1) next/(pref) (2) (See 次亜) hypo- (i.e. containing an element with low valence)/(ctr) (3) order/sequence/time/t\n次 [ji]  /(pref) (1) next/(pref) (2) (See 次亜) hypo- (i.e. containing an element with low valence)/(ctr) (3) order/sequence/time/t\n話 [wa]  /(ctr) counter for stories, episodes of TV series, etc./EntL2100460\n話 [wa]  /(ctr) counter for stories, episodes of TV series, etc./EntL2100460\nは [ha]  /(ctr) counter for waves (of a repeated occurrence)/EntL2844141\nは [ha]  /(ctr) counter for waves (of a repeated occurrence)/EntL2844141\n体 [tai]  /(n,n-suf) (1) body/physique/posture/(n,n-suf) (2) shape/form/style/(n,n-suf) (3) substance/identity/reality/(n,n-suf) (\n形 [kei]  /(suf) (1) form/(n) (2) (abbr) {gramm} (part of speech tag used in dictionaries) (See 形容詞) adjective/i-adjective (in Jap\nち [chi]  /(suf) (col) (uk) (See ん家) 's house/'s home/EntL2858378\nに [ni]  /(suf) looking like (someone)/taking after (either of one's parents)/EntL1314550X\nに [ni]  /(suf) looking like (someone)/taking after (either of one's parents)/EntL1314550X\nる [ru]  /(suf) (col) (as in ググる, ミスる, etc.) verb-forming suffix/EntL2849996\n行 [kou]  /(n,n-suf) (1) going/travelling/traveling/journey/trip/(n) (2) act/action/(n-suf) (3) bank/(ctr) (4) counter for banks/(\n形 [kei]  /(suf) (1) form/(n) (2) (abbr) {gramm} (part of speech tag used in dictionaries) (See 形容詞) adjective/i-adjective (in Jap\n形 [kei]  /(suf) (1) form/(n) (2) (abbr) {gramm} (part of speech tag used in dictionaries) (See 形容詞) adjective/i-adjective (in Jap\nうち [uchi]  /(n,adv) (1) inside/within/(n,adv) (2) (uk) while (e.g. one is young)/during/within (e.g. a day)/in the course of/(n,adv\n形容詞 [keiyoushi]  /(n) {gramm} adjective/i-adjective (in Japanese)/(P)/EntL1250430X\n形容詞 [keiyoushi]  /(n) {gramm} adjective/i-adjective (in Japanese)/(P)/EntL1250430X\n名詞 [meishi(P);nakotoba(ok)]  /(n) {gramm} noun/(P)/EntL1531570X\n名詞 [meishi(P);nakotoba(ok)]  /(n) {gramm} noun/(P)/EntL1531570X\n一般 [ippan]  /(adj-no,n) (1) general/universal/(adj-no,n) (2) (ant: 特殊) ordinary/average/common/non-celebrity/(adj-no,n) (3) (arch) t\n助詞 [joshi]  /(n) {gramm} particle/postpositional word in Japanese grammar that functions as an auxiliary to a main word/(P)/EntL1344\n助詞 [joshi]  /(n) {gramm} particle/postpositional word in Japanese grammar that functions as an auxiliary to a main word/(P)/EntL1344\n名詞 [meishi(P);nakotoba(ok)]  /(n) {gramm} noun/(P)/EntL1531570X",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "次\tツギ\tツギ\t次\t名詞-普通名詞-一般\t\t\t2\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\n話\tハナシ\tハナシ\t話\t名詞-普通名詞-サ変可能\t\t\t3\nは\tワ\tハ\tは\t助詞-係助詞\t\t\t\n近い\tチカイ\tチカイ\t近い\t形容詞-一般\t形容詞\t連体形-一般\t2\nうち\tウチ\tウチ\t内\t名詞-普通名詞-副詞可能\t\t\t0\nに\tニ\tニ\tに\t助詞-格助詞\t\t\t\n公開\tコーカイ\tコウカイ\t公開\t名詞-普通名詞-サ変可能\t\t\t0\nし\tシ\tスル\t為る\t動詞-非自立可能\tサ行変格\t連用形-一般\t0\nます\tマス\tマス\tます\t助動詞\t助動詞-マス\t終止形-一般\t\n。\t\t\t。\t補助記号-句点\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782044583.8937895,
+    "src": "ja",
+    "dst": "en",
+    "orig": "次の話は近いうちに公開します。",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "The next story will be published soon.",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "The next story will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "The next episode will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "い [i]\nい [i]\nし [shi]\n点 [ten]\nす [su]\nす [su]\n次 [ji]\n次 [ji]\n話 [wa]\n話 [wa]\nは [ha]\nは [ha]\n体 [tai]\n形 [kei]\nち [chi]\nに [ni]\nに [ni]\nる [ru]\n行 [kou]\n形 [kei]\n形 [kei]\nうち [uchi]\n形容詞 [keiyoushi]\n形容詞 [keiyoushi]\n名詞 [meishi(P);nakotoba(ok)]\n名詞 [meishi(P);nakotoba(ok)]\n一般 [ippan]\n助詞 [joshi]\n助詞 [joshi]\n名詞 [meishi(P);nakotoba(ok)]",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "次\tツギ\tツギ\t次\t名詞-普通名詞-一般\t\t\t2\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\n話\tハナシ\tハナシ\t話\t名詞-普通名詞-サ変可能\t\t\t3\nは\tワ\tハ\tは\t助詞-係助詞\t\t\t\n近い\tチカイ\tチカイ\t近い\t形容詞-一般\t形容詞\t連体形-一般\t2\nうち\tウチ\tウチ\t内\t名詞-普通名詞-副詞可能\t\t\t0\nに\tニ\tニ\tに\t助詞-格助詞\t\t\t\n公開\tコーカイ\tコウカイ\t公開\t名詞-普通名詞-サ変可能\t\t\t0\nし\tシ\tスル\t為る\t動詞-非自立可能\tサ行変格\t連用形-一般\t0\nます\tマス\tマス\tます\t助動詞\t助動詞-マス\t終止形-一般\t\n。\t\t\t。\t補助記号-句点\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782045806.7300425,
+    "src": "ja",
+    "dst": "en",
+    "orig": "次の話は近いうちに公開します。",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "The next story will be published soon.",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "The next story will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "The next episode will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "次no話ha近iuchini公開shimasu。 i  i  shi  ten su  su ji no話ha近 ji uchini公開shimasu。 wa  wa  ha  ha  tai kei  chi  ni  ni  ru  kou  kei  kei uchi keiyoushi  keiyoushi meishi(P);nakotoba(ok) ni公開 meishi(P);nakotoba(ok) su ippan  joshi  joshi  meishi(P);nakotoba(ok)  meishi(P);nakotoba(ok)  kanou  joshi  joshi chikai  chikai  ippan  ippan  meishi(P);nakotoba(ok)  meishi(P);nakotoba(ok)  fukushi kanou  joshi  joshi koukai  koukai meishi(P);nakotoba(ok)  meishi(P);nakotoba(ok)  kanou  doushi  jiritsu kanou  ippan  masu  masu  doushi  doushi  ippan  kigou tsugi no話ha近 tsugi uchini公開shimasu。 no  no  nou  nou  nou  nou  gyou  kaku  you tsuumei masu。 tsuumei  tsuumei  tsuumei futsuumeishi su。 futsuumeishi  futsuumeishi  futsuumeishi  hojokigou kakujoshi  rentaikei  kakujoshi  hijiritsu  renyoukei  jodoushi jodoushi  shuushikei keijo;kakarijo  naimei  shisu  henkaku  masu masu  masu  kuten shi ni公開shi shi su。 shi  shi  ha  shi ha  shi  shi  shi  ha  shi  shi  i  i  shi  shi  kata;gata  shi  shi  shi  ni ni  shi  shi  kai  ー  i  i  kai  shi  shi  i su  shi  kyaku  kata;gata  shi  shi  kata;gata  jo suke\n次の話は近いうちに公開します。",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "次\tツギ\tツギ\t次\t名詞-普通名詞-一般\t\t\t2\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\n話\tハナシ\tハナシ\t話\t名詞-普通名詞-サ変可能\t\t\t3\nは\tワ\tハ\tは\t助詞-係助詞\t\t\t\n近い\tチカイ\tチカイ\t近い\t形容詞-一般\t形容詞\t連体形-一般\t2\nうち\tウチ\tウチ\t内\t名詞-普通名詞-副詞可能\t\t\t0\nに\tニ\tニ\tに\t助詞-格助詞\t\t\t\n公開\tコーカイ\tコウカイ\t公開\t名詞-普通名詞-サ変可能\t\t\t0\nし\tシ\tスル\t為る\t動詞-非自立可能\tサ行変格\t連用形-一般\t0\nます\tマス\tマス\tます\t助動詞\t助動詞-マス\t終止形-一般\t\n。\t\t\t。\t補助記号-句点\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  },
+  {
+    "ts": 1782048762.3431275,
+    "src": "ja",
+    "dst": "en",
+    "orig": "次の話は近いうちに公開します。",
+    "results": [
+      {
+        "translator": "Google",
+        "text": "The next story will be published soon.",
+        "error": null
+      },
+      {
+        "translator": "Bing",
+        "text": "The next story will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "DeepL (free)",
+        "text": "",
+        "error": "DeepL (free) rate limit (429)"
+      },
+      {
+        "translator": "Baidu",
+        "text": "The next episode will be released soon.",
+        "error": null
+      },
+      {
+        "translator": "Yandex",
+        "text": "",
+        "error": "Client error '403 Forbidden' for url 'https://translate.yandex.net/api/v1/tr.json/translate?lang=ja-en&srv=tr-text&id='\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"
+      },
+      {
+        "translator": "JParser",
+        "text": "次の話は近いうちに公開します。",
+        "error": null
+      },
+      {
+        "translator": "MeCab",
+        "text": "次\tツギ\tツギ\t次\t名詞-普通名詞-一般\t\t\t2\nの\tノ\tノ\tの\t助詞-格助詞\t\t\t\n話\tハナシ\tハナシ\t話\t名詞-普通名詞-サ変可能\t\t\t3\nは\tワ\tハ\tは\t助詞-係助詞\t\t\t\n近い\tチカイ\tチカイ\t近い\t形容詞-一般\t形容詞\t連体形-一般\t2\nうち\tウチ\tウチ\t内\t名詞-普通名詞-副詞可能\t\t\t0\nに\tニ\tニ\tに\t助詞-格助詞\t\t\t\n公開\tコーカイ\tコウカイ\t公開\t名詞-普通名詞-サ変可能\t\t\t0\nし\tシ\tスル\t為る\t動詞-非自立可能\tサ行変格\t連用形-一般\t0\nます\tマス\tマス\tます\t助動詞\t助動詞-マス\t終止形-一般\t\n。\t\t\t。\t補助記号-句点\t\t\t\nEOS\n",
+        "error": null
+      }
+    ]
+  }
+]
