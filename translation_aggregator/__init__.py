@@ -7,6 +7,8 @@ from .translators import (
     DeepLTranslator,
     BaiduTranslator,
     YandexTranslator,
+    WwwjdicTranslator,
+    OpenAICompatTranslator,
 )
 
 __all__ = [
@@ -19,4 +21,6 @@ __all__ = [
     "DeepLTranslator",
     "BaiduTranslator",
     "YandexTranslator",
+    "WwwjdicTranslator",
+    "OpenAICompatTranslator",
 ]

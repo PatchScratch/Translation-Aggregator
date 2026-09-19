@@ -6,42 +6,31 @@ from typing import List
 
 from . import TranslatorAggregator, Language
 from .base import TranslationResult
+from .config import config
+from .engines import TRANSLATOR_MAP, make_translator
 
 
 def main(argv: List[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Translation Aggregator (Python port)")
     parser.add_argument("text", help="Text to translate")
-    parser.add_argument("-s", "--src", default="auto", help="Source language (default auto)")
+    parser.add_argument("-s", "--src", default="ja", help="Source language (default ja)")
     parser.add_argument("-d", "--dst", default="en", help="Target language (default en)")
     parser.add_argument(
-        "-t", "--translators",
-        default="google,bing,deepl",
-        help="Comma separated list of translators (google,bing,deepl,baidu,baidu_pw,yandex). baidu_pw uses Playwright (real browser) for Baidu mtpe-individual."
+        "-t",
+        "--translators",
+        default="google,bing,deepl,yandex,wwwjdic",
+        help="Comma list: google,bing,deepl,baidu,baidu_pw,yandex,wwwjdic,openai",
     )
-    parser.add_argument("--timeout", type=float, default=20.0, help="HTTP timeout")
     args = parser.parse_args(argv)
-
-    wanted = [x.strip().lower() for x in args.src.split(",") if x.strip()]
-    from .translators import (
-        GoogleTranslator, BingTranslator, DeepLTranslator, BaiduTranslator, BaiduPlaywrightTranslator, YandexTranslator
-    )
-    registry = {
-        "google": GoogleTranslator,
-        "bing": BingTranslator,
-        "deepl": DeepLTranslator,
-        "baidu": BaiduTranslator,
-        "baidu_pw": BaiduPlaywrightTranslator,
-        "yandex": YandexTranslator,
-    }
 
     translators = []
     for name in args.translators.split(","):
         name = name.strip().lower()
-        if name in registry:
-            translators.append(registry[name]())
+        if name in TRANSLATOR_MAP:
+            translators.append(make_translator(name, config))
 
     if not translators:
-        translators = [GoogleTranslator()]
+        translators = [make_translator("google", config)]
 
     agg = TranslatorAggregator(translators)
     results: List[TranslationResult] = agg.translate(args.text, src=args.src, dst=args.dst)

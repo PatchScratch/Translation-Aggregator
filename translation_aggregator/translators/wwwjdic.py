@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 from html import unescape
 from typing import Optional
+from urllib.parse import quote
 
 import httpx
 
@@ -26,7 +27,7 @@ class WwwjdicTranslator(Translator):
 
     def __init__(self, mirror: str = DEFAULT_MIRROR, client: Optional[httpx.Client] = None):
         super().__init__()
-        self.mirror = mirror.rstrip("?/")
+        self.mirror = (mirror or DEFAULT_MIRROR).rstrip("?/")
         self.client = client or httpx.Client(timeout=20.0, follow_redirects=True)
 
     def can_translate(self, src: Language | str, dst: Language | str) -> bool:
@@ -42,7 +43,7 @@ class WwwjdicTranslator(Translator):
         dst_code = self._get_lang(dst, Language.English)
         if not text.strip():
             return TranslationResult(self.name, src_code, dst_code, "")
-        url = f"{self.mirror}?9ZIG{text}"
+        url = f"{self.mirror}?9ZIG{quote(text, safe='')}"
         try:
             resp = self.client.get(url, headers={"User-Agent": "TranslationAggregator/0.2"})
             resp.raise_for_status()

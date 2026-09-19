@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Dict, List, Any
@@ -18,7 +17,6 @@ def _config_dir() -> Path:
 
 
 def _default_config_path() -> Path:
-    # Keep similar to original: prefer local ini next to exe / cwd for familiarity
     local = Path("TranslationAggregator.ini")
     if local.exists():
         return local
@@ -27,17 +25,14 @@ def _default_config_path() -> Path:
 
 @dataclass
 class AppConfig:
-    # Language selection (use Language enum values or names)
     lang_src: str = "ja"
     lang_dst: str = "en"
 
-    # General
     auto_clipboard: bool = True
     enable_substitutions: bool = True
     auto_hiragana: bool = False
     half_to_full: bool = False
 
-    # JParser flags (mirrors JPARSER_*)
     jparser_use_mecab: bool = True
     jparser_show_conj: bool = True
     jparser_japanese_own_line: bool = False
@@ -47,62 +42,51 @@ class AppConfig:
     jparser_definition_lines: bool = False
     jparser_reformat_numbers: bool = False
     jparser_no_kana_brackets: bool = False
-
-    # JParser furigana mode for the GUI pane
-    # none | hiragana | katakana | romaji
     jparser_furigana: str = "none"
-
-    # JParser font sizes (points)
     jparser_font_size_normal: int = 11
     jparser_font_size_furigana: int = 8
-
-    # JParser word highlight colors (6 hex digits RRGGBB, no #)
     jparser_color_default: str = "000000"
     jparser_color_translated: str = "C8F0C8"
     jparser_color_particles: str = "E0E0FF"
     jparser_color_furigana: str = "000000"
-
-    # JParser tooltip colors (6 hex digits RRGGBB, no #)
     jparser_color_kanji: str = "A00000"
     jparser_color_kana: str = "1EA01E"
     jparser_color_parentheses: str = "64AAE6"
     jparser_color_conjugations: str = "969696"
 
-    # MeCab pane furigana mode (none | hiragana | katakana | romaji)
-    # Default matches original TA MeCab pane (HIRAGANA)
     mecab_furigana: str = "hiragana"
-
-    # MeCab font sizes (points) - match original Mecab Configuration dialog
     mecab_font_size_normal: int = 13
     mecab_font_size_furigana: int = 10
-
-    # MeCab word highlight colors (6 hex digits RRGGBB, no #)
     mecab_color_default: str = "80F9FF"
-    mecab_color_furigana: str = "E0DE00"   # "Words with furigana"
+    mecab_color_furigana: str = "E0DE00"
     mecab_color_particles: str = "E0DEFF"
 
-    # ATLAS config (mirrors AtlasConfig + dialog in original)
     atlas_environment: str = "General"
-    atlas_trs_path: str = ""          # rule set file name (without path) or empty
-    atlas_flags: int = 0              # bitmask: matches IDC_ELLIPSES etc. in AtlasDialogProc
+    atlas_trs_path: str = ""
+    atlas_flags: int = 0
 
-    # Translators enabled
-    enabled_translators: List[str] = field(default_factory=lambda: ["google", "bing", "deepl"])
+    enabled_translators: List[str] = field(
+        default_factory=lambda: ["google", "bing", "deepl", "yandex", "wwwjdic"]
+    )
 
-    # DeepL settings
-    # mode: "free" (scraped web endpoint) or "api" (official DeepL API)
-    deepl_mode: str = "free"          # "free" or "api"
-    deepl_api_key: str = ""           # required when deepl_mode == "api"
-    deepl_api_base_url: str = ""      # optional override (e.g. https://api-free.deepl.com/v2/translate)
+    deepl_mode: str = "free"
+    deepl_api_key: str = ""
+    deepl_api_base_url: str = ""
 
-    # Paths
+    wwwjdic_mirror: str = "https://www.edrdg.org/cgi-bin/wwwjdic/wwwjdic"
+
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
+    openai_system_prompt: str = (
+        "Translate the user text from {src} to {dst}. "
+        "Return only the translation. Preserve line breaks."
+    )
+
     dictionaries_dir: str = "dictionaries"
-    mecab_path: str = ""  # optional explicit path to mecab or libmecab
+    mecab_path: str = ""
 
-    # Substitutions (profile -> list of (old, rep))
     substitutions: Dict[str, List[List[str]]] = field(default_factory=dict)
-
-    # Window geometry (serialized)
     geometry: Dict[str, Any] = field(default_factory=dict)
 
     path: Path = field(default_factory=_default_config_path, repr=False)
@@ -110,12 +94,10 @@ class AppConfig:
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         data = asdict(self)
-        # don't persist path itself
         data.pop("path", None)
         if self.path.suffix.lower() == ".json":
             self.path.write_text(json.dumps(data, indent=2), encoding="utf-8")
         else:
-            # very simple ini-like for familiarity (only top level scalars + json blob for complex)
             lines = []
             for k, v in data.items():
                 if isinstance(v, (dict, list)):
