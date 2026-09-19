@@ -42,13 +42,14 @@ class Stage1Window(MainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Translation Aggregator")
-        self.resize(1400, 900)
+        self.resize(1600, 950)
         self._engine_keys: list[str] = []
         self._thread = None
         self._worker = None
         self._add_settings_button()
         self._hide_atlas()
         self._load_web_engines()
+        self._refresh_grid_layout()
 
     def _add_settings_button(self):
         btn = QPushButton("Settings")
@@ -90,7 +91,6 @@ class Stage1Window(MainWindow):
             self.pane_list.remove(pane)
         pane.hide()
         pane.setParent(None)
-        self._refresh_grid_layout()
 
     def _load_web_engines(self):
         names = list(getattr(self.config, "enabled_translators", None) or [])
@@ -111,18 +111,36 @@ class Stage1Window(MainWindow):
         self._refresh_grid_layout()
 
     def _refresh_grid_layout(self):
-        """Two columns: parsers left, MT engines right."""
-        while self.columns_splitter.count() < 2:
+        split = getattr(self, "columns_splitter", None)
+        if split is None:
+            return
+        split.setOrientation(Qt.Orientation.Horizontal)
+        split.setChildrenCollapsible(False)
+        split.setHandleWidth(8)
+
+        while split.count() < 2:
             col = QSplitter(Qt.Orientation.Vertical)
             col.setChildrenCollapsible(False)
             col.setHandleWidth(6)
-            self.columns_splitter.addWidget(col)
-        while self.columns_splitter.count() > 2:
-            extra = self.columns_splitter.widget(self.columns_splitter.count() - 1)
+            col.setMinimumWidth(360)
+            split.addWidget(col)
+        while split.count() > 2:
+            extra = split.widget(split.count() - 1)
             extra.setParent(None)
 
-        left = self.columns_splitter.widget(0)
-        right = self.columns_splitter.widget(1)
+        left = split.widget(0)
+        right = split.widget(1)
+        if not isinstance(left, QSplitter):
+            left = QSplitter(Qt.Orientation.Vertical)
+            split.replaceWidget(0, left)
+        if not isinstance(right, QSplitter):
+            right = QSplitter(Qt.Orientation.Vertical)
+            split.replaceWidget(1, right)
+        left.setOrientation(Qt.Orientation.Vertical)
+        right.setOrientation(Qt.Orientation.Vertical)
+        left.setMinimumWidth(360)
+        right.setMinimumWidth(360)
+
         for col in (left, right):
             while col.count():
                 w = col.widget(0)
@@ -131,10 +149,10 @@ class Stage1Window(MainWindow):
         parsers = {"JParser", "MeCab", "ATLAS"}
         left_panes = [p for p in self.grid_order if p is not None and p.name in parsers]
         right_panes = [p for p in self.grid_order if p is not None and p.name not in parsers]
-        if not left_panes:
+        if not right_panes and len(self.grid_order) > 2:
             mid = (len(self.grid_order) + 1) // 2
-            left_panes = self.grid_order[:mid]
-            right_panes = self.grid_order[mid:]
+            left_panes = list(self.grid_order[:mid])
+            right_panes = list(self.grid_order[mid:])
         for p in left_panes:
             left.addWidget(p)
             p.setVisible(True)
@@ -143,7 +161,9 @@ class Stage1Window(MainWindow):
             right.addWidget(p)
             p.setVisible(True)
             p.show()
-        self.columns_splitter.setSizes([560, 840])
+        QApplication.processEvents()
+        total = max(split.width(), 1200)
+        split.setSizes([total // 3, (total * 2) // 3])
 
     def _on_translate_clicked(self):
         if self._thread is not None and self._thread.isRunning():
