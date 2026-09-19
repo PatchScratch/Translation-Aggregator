@@ -1,6 +1,7 @@
 """Stage 1 GUI overlay: web engines + WWWJDIC + OpenAI. No ATLAS."""
 from __future__ import annotations
 
+from PyQt6.QtCore import QObject, QThread, pyqtSignal
 from PyQt6.QtWidgets import QApplication, QPushButton
 
 from ..engines import TRANSLATOR_MAP, make_translator, DISPLAY_NAMES
@@ -8,11 +9,42 @@ from .config_dialog import ConfigDialog
 from .window import MainWindow, TranslatorPane
 
 
+class _EngineWorker(QObject):
+    one_done = pyqtSignal(str, str)  # title, text
+    finished = pyqtSignal()
+
+    def __init__(self, jobs, src, dst, cfg):
+        super().__init__()
+        self.jobs = jobs  # list of (title, key)
+        self.src = src
+        self.dst = dst
+        self.cfg = cfg
+        self._stop = False
+
+    def run(self):
+        for title, key in self.jobs:
+            if self._stop:
+                break
+            try:
+                eng = make_translator(key, self.cfg)
+                res = eng.translate(self.text, src=self.src, dst=self.dst)
+                out = (res.error or res.text or "").strip()
+            except Exception as e:
+                out = str(e)
+            self.one_done.emit(title, out)
+        self.finished.emit()
+
+    def set_text(self, text: str):
+        self.text = text
+
+
 class Stage1Window(MainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Translation Aggregator")
         self._engine_keys: list[str] = []
+        self._thread = None
+        self._worker = None
         self._add_settings_button()
         self._hide_atlas()
         self._load_web_engines()
@@ -68,7 +100,6 @@ class Stage1Window(MainWindow):
         for key in names:
             if key not in TRANSLATOR_MAP:
                 continue
-            # Do not construct Playwright/DeepL/etc at startup — that hangs the UI.
             self._engine_keys.append(key)
             title = DISPLAY_NAMES.get(key, key)
             pane = TranslatorPane(title)
@@ -78,22 +109,9 @@ class Stage1Window(MainWindow):
             self._register_pane(pane)
         self._refresh_grid_layout()
 
-    def _engine_for_pane(self, pane):
-        eng = getattr(pane, "_engine", None)
-        if eng is not None:
-            return eng
-        key = getattr(pane, "_engine_key", None)
-        if not key:
-            return None
-        try:
-            eng = make_translator(key, self.config)
-        except Exception as e:
-            pane.edit.setPlainText(str(e))
-            return None
-        pane._engine = eng
-        return eng
-
     def _on_translate_clicked(self):
+        if self._thread is not None and self._thread.isRunning():
+            return
         self._refresh_jparser_from_source()
         self._refresh_mecab_from_source()
         text = ""
@@ -103,25 +121,41 @@ class Stage1Window(MainWindow):
             return
         if not text:
             return
+        jobs = []
+        for pane in list(self.grid_order):
+            key = getattr(pane, "_engine_key", None)
+            if not key or not getattr(pane, "edit", None):
+                continue
+            pane.edit.setPlainText("..." )
+            jobs.append((pane.name, key))
+        if not jobs:
+            return
         self.btn_translate.setEnabled(False)
-        QApplication.processEvents()
-        try:
-            for pane in list(self.grid_order):
-                if not getattr(pane, "edit", None) or not getattr(pane, "_engine_key", None):
-                    continue
-                pane.edit.setPlainText("..." )
-                QApplication.processEvents()
-                eng = self._engine_for_pane(pane)
-                if eng is None:
-                    continue
-                try:
-                    res = eng.translate(text, src=self.src_lang, dst=self.dst_lang)
-                    pane.edit.setPlainText((res.error or res.text or "").strip())
-                except Exception as e:
-                    pane.edit.setPlainText(str(e))
-                QApplication.processEvents()
-        finally:
-            self.btn_translate.setEnabled(True)
+        worker = _EngineWorker(jobs, self.src_lang, self.dst_lang, self.config)
+        worker.set_text(text)
+        thread = QThread(self)
+        worker.moveToThread(thread)
+        thread.started.connect(worker.run)
+        worker.one_done.connect(self._on_engine_done)
+        worker.finished.connect(thread.quit)
+        worker.finished.connect(worker.deleteLater)
+        thread.finished.connect(self._on_engines_finished)
+        thread.finished.connect(thread.deleteLater)
+        self._thread = thread
+        self._worker = worker
+        thread.start()
+
+    def _on_engine_done(self, title: str, text: str):
+        pane = self.panes.get(title)
+        if pane is None:
+            pane = next((p for p in self.grid_order if p.name == title), None)
+        if pane is not None and getattr(pane, "edit", None):
+            pane.edit.setPlainText(text)
+
+    def _on_engines_finished(self):
+        self.btn_translate.setEnabled(True)
+        self._thread = None
+        self._worker = None
 
     def _refresh_atlas_from_source(self):
         return
