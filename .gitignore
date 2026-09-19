@@ -1,7 +1,31 @@
-*.o
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+build-*
+.venv/
+venv/
+.env
+
+# Local config and secrets
+config.json
+history.json
+*.ini
+.TranslationAggregator/
+
+# Probe / scrape dumps
+baidu_main_bundle.js
+baidu_mtpe_response.html
+probe_*.py
+
+# OS / IDE
 .DS_Store
+.vscode/
+*.o
 *.a
 *.exe
 *.7z
-build
-build-*
