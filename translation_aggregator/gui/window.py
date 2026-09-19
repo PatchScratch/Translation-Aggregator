@@ -29,7 +29,7 @@ class JParserRubyWidget(QWidget):
         self._seg_rects: list[tuple[int, int, int, int, int]] = []  # (x, y, w, h, idx)
         self._hover_idx = -1
         self.setMouseTracking(True)
-        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setMinimumHeight(40)
         # Force white background so JParser highlight colors (and default black text) are visible
         self.setAutoFillBackground(True)
@@ -95,6 +95,8 @@ class JParserRubyWidget(QWidget):
         x = margin
         y_ruby = margin + fm_r.ascent()
         y_jap  = y_ruby + fm_r.descent() + gap + fm_j.ascent()
+        line_h = fm_r.height() + gap + fm_j.height() + 4
+        max_w = max(self.width() - margin, 40)
 
         self._seg_rects = []
         for i, (rd, jp, det, col) in enumerate(self.segments):
@@ -125,11 +127,16 @@ class JParserRubyWidget(QWidget):
 
             self._seg_rects.append((x, y_jap - fm_j.ascent(), w, h, i))
             x += w + 6
+            if i + 1 < len(self.segments):
+                nxt = self.segments[i + 1]
+                nrd, njp = (nxt[0] or ''), (nxt[1] or '')
+                nw = max(fm_r.horizontalAdvance(nrd), fm_j.horizontalAdvance(njp)) + 4
+                if x + nw > max_w:
+                    x = margin
+                    y_ruby += line_h
+                    y_jap += line_h
 
         p.end()
-        total_h = y_jap + fm_j.descent() + margin
-        if self.height() != total_h:
-            self.setFixedHeight(total_h)
 
     def _seg_at(self, pos: QPoint) -> int:
         for x,y,w,h,idx in self._seg_rects:
@@ -225,6 +232,8 @@ class MecabRubyWidget(QWidget):
         x = margin
         y_ruby = margin + fm_r.ascent()
         y_surf = y_ruby + fm_r.descent() + gap + fm_s.ascent()
+        line_h = fm_r.height() + gap + fm_s.height() + 4
+        max_w = max(self.width() - margin, 40)
 
         self._seg_rects = []
         for i, item in enumerate(self.tokens):
@@ -275,11 +284,13 @@ class MecabRubyWidget(QWidget):
 
             self._seg_rects.append((x, y_surf - fm_s.ascent(), w, h, i))
             x += w + 6
+            if i + 1 < len(self.tokens):
+                if x + 40 > max_w:
+                    x = margin
+                    y_ruby += line_h
+                    y_surf += line_h
 
         p.end()
-        total_h = y_surf + fm_s.descent() + margin
-        if self.height() != total_h:
-            self.setFixedHeight(total_h)
 
     def _seg_at(self, pos: QPoint) -> int:
         for x, y, w, h, idx in self._seg_rects:
@@ -373,11 +384,13 @@ class TranslatorPane(QWidget):
             self.close_btn.show()
         self.layout().addWidget(header)
         self.header = header
+        header.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        header.setFixedHeight(26)
 
         if self.name == "JParser":
             # Use ruby widget for classic look: readings above Japanese words, hover for gloss
             self.jp_ruby = JParserRubyWidget()
-            self.jp_ruby.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+            self.jp_ruby.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
             # Force white background so JParser highlight colors (kanji/kana/translated/particles etc.) are visible
             self.jp_ruby.setAutoFillBackground(True)
             pal = self.jp_ruby.palette()
@@ -387,7 +400,7 @@ class TranslatorPane(QWidget):
             self.layout().addWidget(self.jp_ruby)
             self.edit = None
             self.layout().setStretch(0, 0)
-            self.layout().setStretch(1, 0)
+            self.layout().setStretch(1, 1)
         elif self.name == "MeCab":
             # Faithful MeCab pane: tokenized output with readings (hiragana default), matching MecabWindow.cpp
             self.mecab_ruby = MecabRubyWidget()
@@ -411,6 +424,8 @@ class TranslatorPane(QWidget):
             )
             self.edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
             self.edit.setMinimumHeight(48)
+            self.edit.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
+            self.edit.setAcceptRichText(False)
             self.layout().addWidget(self.edit)
             self.layout().setStretch(0, 0)
             self.layout().setStretch(1, 1)
