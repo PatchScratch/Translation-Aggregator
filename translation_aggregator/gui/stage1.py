@@ -111,7 +111,7 @@ class Stage1Window(MainWindow):
         self._refresh_grid_layout()
 
     def _refresh_grid_layout(self):
-        """Two columns so engine panes are wide enough to read."""
+        """Two columns: parsers left, MT engines right."""
         while self.columns_splitter.count() < 2:
             col = QSplitter(Qt.Orientation.Vertical)
             col.setChildrenCollapsible(False)
@@ -128,17 +128,22 @@ class Stage1Window(MainWindow):
                 w = col.widget(0)
                 w.setParent(None)
 
-        panes = [p for p in self.grid_order if p is not None]
-        mid = (len(panes) + 1) // 2
-        for p in panes[:mid]:
+        parsers = {"JParser", "MeCab", "ATLAS"}
+        left_panes = [p for p in self.grid_order if p is not None and p.name in parsers]
+        right_panes = [p for p in self.grid_order if p is not None and p.name not in parsers]
+        if not left_panes:
+            mid = (len(self.grid_order) + 1) // 2
+            left_panes = self.grid_order[:mid]
+            right_panes = self.grid_order[mid:]
+        for p in left_panes:
             left.addWidget(p)
             p.setVisible(True)
             p.show()
-        for p in panes[mid:]:
+        for p in right_panes:
             right.addWidget(p)
             p.setVisible(True)
             p.show()
-        self.columns_splitter.setSizes([700, 700])
+        self.columns_splitter.setSizes([560, 840])
 
     def _on_translate_clicked(self):
         if self._thread is not None and self._thread.isRunning():
