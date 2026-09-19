@@ -1,8 +1,8 @@
 """Stage 1 GUI overlay: web engines + WWWJDIC + OpenAI. No ATLAS."""
 from __future__ import annotations
 
-from PyQt6.QtCore import QObject, QThread, pyqtSignal
-from PyQt6.QtWidgets import QApplication, QPushButton
+from PyQt6.QtCore import QObject, QThread, Qt, pyqtSignal
+from PyQt6.QtWidgets import QApplication, QPushButton, QSplitter
 
 from ..engines import TRANSLATOR_MAP, make_translator, DISPLAY_NAMES
 from .config_dialog import ConfigDialog
@@ -10,12 +10,12 @@ from .window import MainWindow, TranslatorPane
 
 
 class _EngineWorker(QObject):
-    one_done = pyqtSignal(str, str)  # title, text
+    one_done = pyqtSignal(str, str)
     finished = pyqtSignal()
 
     def __init__(self, jobs, src, dst, cfg):
         super().__init__()
-        self.jobs = jobs  # list of (title, key)
+        self.jobs = jobs
         self.src = src
         self.dst = dst
         self.cfg = cfg
@@ -42,6 +42,7 @@ class Stage1Window(MainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Translation Aggregator")
+        self.resize(1400, 900)
         self._engine_keys: list[str] = []
         self._thread = None
         self._worker = None
@@ -108,6 +109,36 @@ class Stage1Window(MainWindow):
             self.panes[title] = pane
             self._register_pane(pane)
         self._refresh_grid_layout()
+
+    def _refresh_grid_layout(self):
+        """Two columns so engine panes are wide enough to read."""
+        while self.columns_splitter.count() < 2:
+            col = QSplitter(Qt.Orientation.Vertical)
+            col.setChildrenCollapsible(False)
+            col.setHandleWidth(6)
+            self.columns_splitter.addWidget(col)
+        while self.columns_splitter.count() > 2:
+            extra = self.columns_splitter.widget(self.columns_splitter.count() - 1)
+            extra.setParent(None)
+
+        left = self.columns_splitter.widget(0)
+        right = self.columns_splitter.widget(1)
+        for col in (left, right):
+            while col.count():
+                w = col.widget(0)
+                w.setParent(None)
+
+        panes = [p for p in self.grid_order if p is not None]
+        mid = (len(panes) + 1) // 2
+        for p in panes[:mid]:
+            left.addWidget(p)
+            p.setVisible(True)
+            p.show()
+        for p in panes[mid:]:
+            right.addWidget(p)
+            p.setVisible(True)
+            p.show()
+        self.columns_splitter.setSizes([700, 700])
 
     def _on_translate_clicked(self):
         if self._thread is not None and self._thread.isRunning():
