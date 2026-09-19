@@ -1,7 +1,8 @@
-"""OpenAI-compatible chat-completions translator (OpenAI, LM Studio, proxies)."""
+"""OpenAI-compatible chat-completions translator (OpenAI, OpenRouter, LM Studio)."""
 from __future__ import annotations
 
 from typing import Optional
+from urllib.parse import urlparse
 
 import httpx
 
@@ -27,10 +28,13 @@ class OpenAICompatTranslator(Translator):
         client: Optional[httpx.Client] = None,
     ):
         super().__init__()
-        self.base_url = base_url.rstrip("/")
-        self.api_key = api_key
-        self.model = model
-        self.system_prompt = system_prompt
+        self.base_url = (base_url or DEFAULT_BASE).rstrip("/")
+        key = (api_key or "").strip()
+        if key.lower().startswith("bearer "):
+            key = key[7:].strip()
+        self.api_key = key
+        self.model = (model or DEFAULT_MODEL).strip()
+        self.system_prompt = system_prompt or DEFAULT_PROMPT
         self.client = client or httpx.Client(timeout=60.0, follow_redirects=True)
 
     def translate(
@@ -43,10 +47,23 @@ class OpenAICompatTranslator(Translator):
         dst_code = self._get_lang(dst, Language.English)
         if not text.strip():
             return TranslationResult(self.name, src_code, dst_code, "")
+        if not self.api_key:
+            return TranslationResult(
+                self.name,
+                src_code,
+                dst_code,
+                "",
+                error="No API key saved in Settings. Set OpenAI-compatible API key and press OK.",
+            )
         url = f"{self.base_url}/chat/completions"
-        headers = {"Content-Type": "application/json"}
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
+        host = urlparse(self.base_url).hostname or ""
+        if "openrouter.ai" in host:
+            headers["HTTP-Referer"] = "https://github.com/PatchScratch/Translation-Aggregator"
+            headers["X-Title"] = "Translation Aggregator"
         prompt = self.system_prompt.format(src=src_code, dst=dst_code)
         payload = {
             "model": self.model,
@@ -58,6 +75,18 @@ class OpenAICompatTranslator(Translator):
         }
         try:
             resp = self.client.post(url, headers=headers, json=payload)
+            if resp.status_code == 401:
+                return TranslationResult(
+                    self.name,
+                    src_code,
+                    dst_code,
+                    "",
+                    error=(
+                        f"OpenRouter/OpenAI 401 (key length {len(self.api_key)}, "
+                        f"model={self.model!r}). Key was sent and rejected. "
+                        f"Create a new key at https://openrouter.ai/keys and paste it again."
+                    ),
+                )
             resp.raise_for_status()
             data = resp.json()
             content = data["choices"][0]["message"]["content"]
