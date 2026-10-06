@@ -1,8 +1,8 @@
 """Stage 1 GUI overlay: web engines + WWWJDIC + OpenAI. No ATLAS."""
 from __future__ import annotations
 
-from PyQt6.QtCore import QObject, QThread, Qt, pyqtSignal
-from PyQt6.QtWidgets import QApplication, QPushButton, QSplitter
+from PyQt6.QtCore import QObject, QThread, pyqtSignal
+from PyQt6.QtWidgets import QPushButton
 
 from ..engines import TRANSLATOR_MAP, make_translator, DISPLAY_NAMES
 from .config_dialog import ConfigDialog
@@ -128,61 +128,6 @@ class Stage1Window(MainWindow):
             # Engines are built from config on every translate run
             # (make_translator in the worker), so the new values apply
             # on the next translation without rebuilding the panes.
-
-    def _refresh_grid_layout(self):
-        split = getattr(self, "columns_splitter", None)
-        if split is None:
-            return
-        split.setOrientation(Qt.Orientation.Horizontal)
-        split.setChildrenCollapsible(False)
-        split.setHandleWidth(8)
-
-        while split.count() < 2:
-            col = QSplitter(Qt.Orientation.Vertical)
-            col.setChildrenCollapsible(False)
-            col.setHandleWidth(6)
-            col.setMinimumWidth(360)
-            split.addWidget(col)
-        while split.count() > 2:
-            extra = split.widget(split.count() - 1)
-            extra.setParent(None)
-
-        left = split.widget(0)
-        right = split.widget(1)
-        if not isinstance(left, QSplitter):
-            left = QSplitter(Qt.Orientation.Vertical)
-            split.replaceWidget(0, left)
-        if not isinstance(right, QSplitter):
-            right = QSplitter(Qt.Orientation.Vertical)
-            split.replaceWidget(1, right)
-        left.setOrientation(Qt.Orientation.Vertical)
-        right.setOrientation(Qt.Orientation.Vertical)
-        left.setMinimumWidth(360)
-        right.setMinimumWidth(360)
-
-        for col in (left, right):
-            while col.count():
-                w = col.widget(0)
-                w.setParent(None)
-
-        parsers = {"JParser", "MeCab", "ATLAS"}
-        left_panes = [p for p in self.grid_order if p is not None and p.name in parsers]
-        right_panes = [p for p in self.grid_order if p is not None and p.name not in parsers]
-        if not right_panes and len(self.grid_order) > 2:
-            mid = (len(self.grid_order) + 1) // 2
-            left_panes = list(self.grid_order[:mid])
-            right_panes = list(self.grid_order[mid:])
-        for p in left_panes:
-            left.addWidget(p)
-            p.setVisible(True)
-            p.show()
-        for p in right_panes:
-            right.addWidget(p)
-            p.setVisible(True)
-            p.show()
-        QApplication.processEvents()
-        total = max(split.width(), 1200)
-        split.setSizes([total // 3, (total * 2) // 3])
 
     def _on_translate_clicked(self):
         if self._thread is not None and self._thread.isRunning():

@@ -5,7 +5,7 @@ from PyQt6.QtGui import QTextCursor, QClipboard, QAction, QDrag, QPainter, QFont
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QToolBar, QPushButton,
     QLabel, QSplitter, QCheckBox, QApplication, QMenuBar, QMenu, QSizePolicy,
-    QMessageBox, QProgressDialog, QToolTip
+    QMessageBox, QProgressDialog, QToolTip, QComboBox
 )
 from PyQt6.QtGui import QPainter, QFont, QFontMetrics, QColor, QPen
 from PyQt6.QtCore import QRect
@@ -461,8 +461,15 @@ class TranslatorPane(QWidget):
             m = QMimeData()
             m.setText("pane:" + _self.name)
             d.setMimeData(m)
-            d.exec(Qt.DropAction.MoveAction)
+            action = d.exec(Qt.DropAction.MoveAction)
             _self._drag_start_pos = None
+            if action == Qt.DropAction.IgnoreAction:
+                # dropped outside any drop target: if that means outside the
+                # main window, tear the pane off into its own window
+                from PyQt6.QtGui import QCursor
+                mw = _self._find_main_window()
+                if mw is not None and not mw.geometry().contains(QCursor.pos()):
+                    mw.float_pane(_self)
 
         def _release(e):
             _self._drag_start_pos = None
@@ -644,7 +651,68 @@ class TranslatorPane(QWidget):
             if isinstance(p, MainWindow):
                 return p
             p = p.parent()
+        # pane may live in a tear-off window; find the main window globally
+        from PyQt6.QtWidgets import QApplication as _QApp
+        for w in _QApp.topLevelWidgets():
+            if isinstance(w, MainWindow):
+                return w
         return None
+
+
+class _Column(QSplitter):
+    """A vertical column that accepts dragged panes (including empty space)."""
+
+    def __init__(self, main_window: "MainWindow", parent=None):
+        super().__init__(Qt.Orientation.Vertical, parent)
+        self._mw = main_window
+        self.setAcceptDrops(True)
+
+    def _pane_mime(self, event) -> str | None:
+        md = event.mimeData()
+        if md.hasText() and md.text().startswith("pane:"):
+            return md.text()[5:]
+        return None
+
+    def dragEnterEvent(self, event):
+        if self._pane_mime(event) is not None:
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event):
+        if self._pane_mime(event) is not None:
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        name = self._pane_mime(event)
+        if name is None:
+            event.ignore()
+            return
+        idx = self._mw.columns_splitter.indexOf(self)
+        if idx >= 0:
+            self._mw.move_pane_to_column(name, idx)
+        event.acceptProposedAction()
+
+
+class _PaneFloatWindow(QWidget):
+    """Owns a pane dragged out of the main window; closing re-docks it."""
+
+    def __init__(self, pane: "TranslatorPane", main_window: "MainWindow"):
+        super().__init__(None)
+        self.setWindowTitle(pane.name)
+        self._pane = pane
+        self._mw = main_window
+        self._redock = True
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(2, 2, 2, 2)
+        lay.addWidget(pane)
+        pane.setVisible(True)
+        pane.show()
+
+    def closeEvent(self, event):
+        if self._redock and self._pane is not None and self._mw is not None:
+            self._mw._redock_pane(self._pane)
+        super().closeEvent(event)
 
 
 class MainWindow(QWidget):
@@ -674,6 +742,10 @@ class MainWindow(QWidget):
         # column_contents[c] is the ordered list of panes currently in column c.
         # This is the source of truth for layout and drag-drop placement.
         self.column_contents: list[list[TranslatorPane]] = []
+        self.n_columns = max(1, min(3, int(getattr(config, "gui_columns", 2) or 2)))
+        self.floating_panes: dict[str, "_PaneFloatWindow"] = {}
+        self._pane_memory: dict[str, tuple[int, int]] = {}  # name -> (col, idx)
+        self._layout_initialized = False
 
         self._build_ui()
         self._load_translators()
@@ -694,7 +766,9 @@ class MainWindow(QWidget):
             if p not in self.grid_order:
                 self.grid_order.append(p)
             self._register_pane(p)
-        self._refresh_grid_layout()
+        # Layout is laid out once all panes exist (Stage1 calls the refresh
+        # after loading the web engines), so the default distribution can
+        # spread parser and engine panes across the columns.
 
         # Minimum height + font sizes for the JParser pane (ruby widget or edit)
         self.jpane.setMinimumHeight(80)
@@ -734,6 +808,18 @@ class MainWindow(QWidget):
         self.chk_clip.setChecked(bool(getattr(config, "auto_clipboard", False)))
         self.chk_clip.toggled.connect(self._set_auto_clipboard)
         top.addWidget(self.chk_clip, 0)
+
+        # Column count selector (1-3); panes can be dragged between columns
+        self.col_label = QLabel("Columns")
+        self.col_combo = QComboBox()
+        self.col_combo.addItems(["1", "2", "3"])
+        self.col_combo.setToolTip("Number of pane columns")
+        self.col_combo.setCurrentText(str(max(1, min(3, self.n_columns))))
+        self.col_combo.currentTextChanged.connect(
+            lambda txt: self._set_column_count(int(txt))
+        )
+        top.addWidget(self.col_label, 0)
+        top.addWidget(self.col_combo, 0)
 
         root.addLayout(top)
 
@@ -1038,23 +1124,45 @@ class MainWindow(QWidget):
             self.grid_order.append(pane)
 
     def _refresh_grid_layout(self):
-        """Place panes into the column splitters (round-robin across visible columns)."""
-        # Ensure we have at least one column splitter
-        while self.columns_splitter.count() < 1:
-            col = QSplitter(Qt.Orientation.Vertical)
+        """Place panes into the column splitters according to column_contents."""
+        split = self.columns_splitter
+        split.setOrientation(Qt.Orientation.Horizontal)
+        split.setChildrenCollapsible(False)
+        split.setHandleWidth(8)
+
+        self._ensure_layout_state()
+        n = len(self.column_contents)
+
+        while split.count() < n:
+            col = _Column(self)
+            col.setOrientation(Qt.Orientation.Vertical)
             col.setChildrenCollapsible(False)
             col.setHandleWidth(6)
-            self.columns_splitter.addWidget(col)
+            col.setMinimumWidth(240)
+            split.addWidget(col)
+        while split.count() > n:
+            extra = split.widget(split.count() - 1)
+            extra.setParent(None)
+            extra.deleteLater()
 
-        # For simplicity in this minimal build: put all grid_order panes into the first column
-        col0 = self.columns_splitter.widget(0)
-        while col0.count():
-            w = col0.widget(0)
-            w.setParent(None)
-        for p in self.grid_order:
-            col0.addWidget(p)
-            p.setVisible(True)
-            p.show()
+        for c in range(n):
+            col = split.widget(c)
+            while col.count():
+                col.widget(0).setParent(None)
+            for p in self.column_contents[c]:
+                col.addWidget(p)
+                p.setVisible(True)
+                p.show()
+
+        # keep grid_order (flat, docked first) valid for consumers
+        self.grid_order = [p for col in self.column_contents for p in col]
+        self.grid_order.extend(
+            fw._pane for fw in self.floating_panes.values() if fw._pane is not None
+        )
+        # remember placement so panes return to their spot after a rebuild
+        for c, col in enumerate(self.column_contents):
+            for i, p in enumerate(col):
+                self._pane_memory[p.name] = (c, i)
 
     def _rebuild_columns(self):
         self._refresh_grid_layout()
@@ -1070,23 +1178,146 @@ class MainWindow(QWidget):
         if hasattr(pane, "set_selected"):
             pane.set_selected(False)
 
+    def _default_columns(self, n: int) -> list[list[TranslatorPane]]:
+        parsers = [p for p in self.pane_list if p.name in ("JParser", "MeCab", "ATLAS")]
+        engines = [p for p in self.pane_list if p.name not in ("JParser", "MeCab", "ATLAS")]
+        if n <= 1:
+            return [parsers + engines]
+        if n == 2:
+            return [parsers, engines]
+        mid = (len(engines) + 1) // 2
+        return [parsers, engines[:mid], engines[mid:]]
+
+    def _ensure_layout_state(self):
+        """Normalize column_contents to the current column count and pane set."""
+        n = self.n_columns
+        # panes currently in their own window are not placed in any column
+        floating = set(self.floating_panes.keys())
+        known = [p for p in self.pane_list if p.name not in floating]
+        if not self._layout_initialized:
+            self._layout_initialized = True
+            restored = self._restore_saved_layout(n)
+            self.column_contents = restored if restored is not None else self._default_columns(n)
+        cols = [[p for p in col if p in known] for col in self.column_contents[:n]]
+        while len(cols) < n:
+            cols.append([])
+        placed = {id(p) for col in cols for p in col}
+        leftovers = [p for p in known if id(p) not in placed]
+        for p in leftovers:
+            mem = self._pane_memory.get(p.name)
+            if mem is not None and mem[0] < len(cols):
+                cols[mem[0]].insert(min(mem[1], len(cols[mem[0]])), p)
+            else:
+                cols[len(cols) - 1].append(p)
+        self.column_contents = cols
+
+    def _restore_saved_layout(self, n: int) -> list[list[TranslatorPane]] | None:
+        saved = (getattr(self.config, "geometry", {}) or {}).get("pane_layout") or {}
+        names_cols = saved.get("cols") or []
+        if not names_cols:
+            return None
+        by_name = {p.name: p for p in self.pane_list}
+        cols: list[list[TranslatorPane]] = []
+        for names in names_cols[:n]:
+            cols.append([by_name[nm] for nm in names if nm in by_name])
+        while len(cols) < n:
+            cols.append([])
+        return cols if any(cols) else None
+
+    def _set_column_count(self, n: int):
+        n = max(1, min(3, int(n)))
+        if n == self.n_columns:
+            return
+        self.n_columns = n
+        try:
+            self.config.gui_columns = n
+            self.config.save()
+        except Exception:
+            pass
+        self._refresh_grid_layout()
+
+    # --- pane placement (drag & drop between columns) ---
+
+    def _locate_pane(self, name: str) -> tuple[int, int] | None:
+        for c, col in enumerate(self.column_contents):
+            for i, p in enumerate(col):
+                if p.name == name:
+                    return (c, i)
+        return None
+
+    def _detach_pane(self, pane: TranslatorPane):
+        for col in self.column_contents:
+            if pane in col:
+                col.remove(pane)
+        fw = self.floating_panes.pop(pane.name, None)
+        if fw is not None:
+            # pull the pane out of the float window before closing it: once
+            # the last reference to the window drops, Qt deletes it together
+            # with any child widgets still inside
+            fw._redock = False
+            fw._pane = None
+            pane.setParent(None)
+            fw.close()
+
+    def _move_pane(self, src_name: str, col_idx: int, index: int):
+        src = next((p for p in self.pane_list if p.name == src_name), None)
+        if src is None:
+            return
+        self._detach_pane(src)
+        col_idx = max(0, min(col_idx, len(self.column_contents) - 1))
+        index = max(0, min(index, len(self.column_contents[col_idx])))
+        self.column_contents[col_idx].insert(index, src)
+        self._refresh_grid_layout()
+
+    def move_pane_to_column(self, src_name: str, col_idx: int):
+        self._move_pane(src_name, col_idx, len(self.column_contents[col_idx]) if col_idx < len(self.column_contents) else 0)
+
     def move_pane_before(self, src_name: str, dst_name: str):
-        self._move_pane_relative(src_name, dst_name, before=True)
+        loc = self._locate_pane(dst_name)
+        if loc is None:
+            return
+        self._move_pane(src_name, loc[0], loc[1])
 
     def move_pane_after(self, src_name: str, dst_name: str):
-        self._move_pane_relative(src_name, dst_name, before=False)
-
-    def _move_pane_relative(self, src_name: str, dst_name: str, before: bool):
-        src = next((p for p in self.grid_order if p.name == src_name), None)
-        dst = next((p for p in self.grid_order if p.name == dst_name), None)
-        if not src or not dst or src is dst:
+        loc = self._locate_pane(dst_name)
+        if loc is None:
             return
-        self.grid_order.remove(src)
-        idx = self.grid_order.index(dst)
-        if not before:
-            idx += 1
-        self.grid_order.insert(idx, src)
+        self._move_pane(src_name, loc[0], loc[1] + 1)
+
+    # --- floating panes (dragged out of the main window) ---
+
+    def float_pane(self, pane: TranslatorPane):
+        if pane.name in self.floating_panes:
+            return
+        self._detach_pane(pane)
+        fw = _PaneFloatWindow(pane, self)
+        fw.resize(460, 380)
+        fw.show()
+        self.floating_panes[pane.name] = fw
         self._refresh_grid_layout()
+
+    def _redock_pane(self, pane: TranslatorPane):
+        """Return a floating pane to the first column (float window closing)."""
+        self.floating_panes.pop(pane.name, None)
+        if pane not in [p for col in self.column_contents for p in col]:
+            self.column_contents[0].append(pane)
+        self._refresh_grid_layout()
+
+    def closeEvent(self, event):
+        # persist the arrangement for the next start; drop the float windows
+        try:
+            self.config.geometry["pane_layout"] = {
+                "columns": self.n_columns,
+                "cols": [[p.name for p in col] for col in self.column_contents],
+            }
+            self.config.gui_columns = self.n_columns
+            self.config.save()
+        except Exception:
+            pass
+        for fw in list(self.floating_panes.values()):
+            fw._redock = False
+            fw.close()
+        super().closeEvent(event)
 
     def _apply_jparser_font_sizes(self):
         # Delegate to the pane if it has the old edit-based applicator (no-op for ruby widget)

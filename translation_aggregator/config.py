@@ -69,6 +69,8 @@ class AppConfig:
         default_factory=lambda: ["google", "bing", "deepl", "yandex", "wwwjdic"]
     )
 
+    gui_columns: int = 2
+
     deepl_mode: str = "free"
     deepl_api_key: str = ""
     deepl_api_base_url: str = ""
