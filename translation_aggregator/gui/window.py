@@ -5,7 +5,7 @@ from PyQt6.QtGui import QTextCursor, QClipboard, QAction, QDrag, QPainter, QFont
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QToolBar, QPushButton,
     QLabel, QSplitter, QCheckBox, QApplication, QMenuBar, QMenu, QSizePolicy,
-    QMessageBox, QProgressDialog, QToolTip, QComboBox
+    QMessageBox, QProgressDialog, QToolTip, QComboBox, QSizeGrip
 )
 from PyQt6.QtGui import QPainter, QFont, QFontMetrics, QColor, QPen
 from PyQt6.QtCore import QRect
@@ -450,12 +450,22 @@ class TranslatorPane(QWidget):
         def _press(e):
             if e.button() == Qt.MouseButton.LeftButton:
                 _self._drag_start_pos = e.position().toPoint()
+                _self._drag_global_start = e.globalPosition().toPoint()
+                fw = _self._float_window()
+                if fw is not None:
+                    fw._move_origin = fw.pos()
                 _self._select_self()
 
         def _move(e):
             if not getattr(_self, '_drag_start_pos', None):
                 return
             if (e.position().toPoint() - _self._drag_start_pos).manhattanLength() < 8:
+                return
+            fw = _self._float_window()
+            if fw is not None:
+                # floating: dragging the header moves the whole borderless
+                # window (releasing over the main window, in _release, docks)
+                fw.move(fw._move_origin + (e.globalPosition().toPoint() - _self._drag_global_start))
                 return
             d = QDrag(_self)
             m = QMimeData()
@@ -472,7 +482,16 @@ class TranslatorPane(QWidget):
                     mw.float_pane(_self)
 
         def _release(e):
+            start = _self._drag_start_pos
+            gstart = getattr(_self, '_drag_global_start', None)
             _self._drag_start_pos = None
+            fw = _self._float_window()
+            if fw is not None and start is not None and gstart is not None:
+                moved = (e.globalPosition().toPoint() - gstart).manhattanLength() >= 8
+                if moved:
+                    mw = _self._find_main_window()
+                    if mw is not None:
+                        mw.dock_pane_at_cursor(_self)
 
         self.header.mousePressEvent = _press
         self.header.mouseMoveEvent = _move
@@ -643,8 +662,12 @@ class TranslatorPane(QWidget):
                 mw.move_pane_before(src_name, self.name)
         event.acceptProposedAction()
 
+    def _float_window(self) -> "_PaneFloatWindow | None":
+        """The tear-off window hosting this pane, if floating."""
+        p = self.parentWidget()
+        return p if isinstance(p, _PaneFloatWindow) else None
+
     def _find_main_window(self):
-        p = self
         while p:
             if isinstance(p, MainWindow):
                 return p
@@ -693,17 +716,35 @@ class _Column(QSplitter):
 
 
 class _PaneFloatWindow(QWidget):
-    """Owns a pane dragged out of the main window; closing re-docks it."""
+    """Owns a pane dragged out of the main window; closing re-docks it.
+
+    Borderless, so the pane keeps its own chrome and there is only one
+    close button (the pane header's). Drag the pane header to move the
+    window; release it over the main window to dock the pane back in.
+    """
 
     def __init__(self, pane: "TranslatorPane", main_window: "MainWindow"):
         super().__init__(None)
         self.setWindowTitle(pane.name)
+        self.setWindowFlags(
+            Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setStyleSheet(
+            "_PaneFloatWindow { border: 1px solid #555; background-color: #2b2b2b; }"
+        )
         self._pane = pane
         self._mw = main_window
         self._redock = True
+        self._move_origin = self.pos()
         lay = QVBoxLayout(self)
         lay.setContentsMargins(2, 2, 2, 2)
         lay.addWidget(pane)
+        # borderless windows have no OS resize handles
+        bottom = QHBoxLayout()
+        bottom.addStretch(1)
+        bottom.addWidget(QSizeGrip(self))
+        lay.addLayout(bottom)
         pane.setVisible(True)
         pane.show()
 
@@ -1289,6 +1330,40 @@ class MainWindow(QWidget):
         self._move_pane(src_name, loc[0], loc[1] + 1)
 
     # --- floating panes (dragged out of the main window) ---
+
+    def dock_pane_at_cursor(self, pane: TranslatorPane, gpos=None):
+        """Dock a floating pane released over the main window.
+
+        Targets the pane under the cursor (before/after by half) or the
+        column under the cursor; anywhere else in the window docks into the
+        nearest column.
+        """
+        from PyQt6.QtGui import QCursor
+        if gpos is None:
+            gpos = QCursor.pos()
+        if not self.geometry().contains(gpos):
+            return
+        w = QApplication.widgetAt(gpos)
+        while w is not None and not isinstance(w, (TranslatorPane, _Column)):
+            w = w.parentWidget()
+        if isinstance(w, TranslatorPane) and w is not pane:
+            local = w.mapFromGlobal(gpos)
+            if local.y() > w.height() // 2:
+                self.move_pane_after(pane.name, w.name)
+            else:
+                self.move_pane_before(pane.name, w.name)
+            return
+        if isinstance(w, _Column):
+            idx = self.columns_splitter.indexOf(w)
+            if idx >= 0:
+                self.move_pane_to_column(pane.name, idx)
+            return
+        n = self.columns_splitter.count()
+        width = self.columns_splitter.width()
+        if n and width > 0:
+            rel = self.columns_splitter.mapFromGlobal(gpos)
+            idx = max(0, min(n - 1, int(rel.x() / width * n)))
+            self.move_pane_to_column(pane.name, idx)
 
     def float_pane(self, pane: TranslatorPane):
         if pane.name in self.floating_panes:
