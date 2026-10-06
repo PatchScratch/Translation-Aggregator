@@ -216,6 +216,7 @@ class _AtlasBridge:
 
     def translate(self, text: str) -> str:
         if not self.ready or not self.translate_pair:
+            print("[atlas_bridge] translate: engine not ready", file=sys.stderr)
             return ""
 
         try:
@@ -225,16 +226,16 @@ class _AtlasBridge:
             size = c_uint(0)
 
             res = self.translate_pair(jis, byref(out_ptr), byref(dummy), byref(size))
+            print(f"[atlas_bridge] TranslatePair res={res} size={size.value} out={bool(out_ptr.value)}", file=sys.stderr)
             if res == 0 and out_ptr.value:
                 result = out_ptr.value.decode("shift_jis", errors="replace")
-                if self.free:
-                    try:
-                        self.free(out_ptr.value, None, None, None)
-                    except Exception:
-                        pass
+                # NOTE: do not call FreeAtlasData here. With NULL companion
+                # arguments it corrupts the process (hard crash before the
+                # result reaches stdout); this bridge is one-shot per
+                # translation, so the engine's memory is freed at exit.
                 return result
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[atlas_bridge] translate CRASHED: {type(e).__name__} {e}", file=sys.stderr)
         return ""
 
 

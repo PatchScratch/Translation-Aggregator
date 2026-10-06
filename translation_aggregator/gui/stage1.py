@@ -56,6 +56,8 @@ class _EngineWorker(QObject):
 
 
 class Stage1Window(MainWindow):
+    atlas_done = pyqtSignal(str)
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Translation Aggregator")
@@ -65,9 +67,9 @@ class Stage1Window(MainWindow):
         self._worker = None
         self._queued_text = None
         self._add_settings_button()
-        self._hide_atlas()
         self._load_web_engines()
         self._sync_parser_panes()
+        self.atlas_done.connect(self._on_atlas_done)
 
     def _add_settings_button(self):
         btn = QPushButton("Settings")
@@ -163,6 +165,7 @@ class Stage1Window(MainWindow):
         self._queued_text = None
         self._refresh_jparser_from_source()
         self._refresh_mecab_from_source()
+        self._refresh_atlas_from_source()
         text = ""
         try:
             text = self.src_edit.toPlainText().strip()
@@ -233,4 +236,56 @@ class Stage1Window(MainWindow):
             self._on_translate_clicked()
 
     def _refresh_atlas_from_source(self):
-        return
+        """ATLAS runs through a 32-bit bridge subprocess (~1-3 s), so do the
+        engine work off the UI thread and land the result via a signal."""
+        apane = getattr(self, "apane", None)
+        if apane is None:
+            return
+        edit = getattr(apane, "edit", None)
+        text = ""
+        try:
+            text = self.src_edit.toPlainText().strip()
+        except Exception:
+            return
+        if not text:
+            if edit:
+                edit.setPlainText("")
+            return
+        try:
+            src = (getattr(self, "src_lang", "") or "").lower()
+            dst = (getattr(self, "dst_lang", "") or "").lower()
+            if src.startswith("ja") and dst.startswith("en"):
+                direction = 1
+            elif src.startswith("en") and dst.startswith("ja"):
+                direction = 2
+            else:
+                if edit:
+                    edit.setPlainText("")
+                return
+        except Exception:
+            return
+        if edit:
+            edit.setPlainText("...")
+        env = (getattr(self.config, "atlas_environment", "General") or "General")
+        trs = getattr(self.config, "atlas_trs_path", "") or ""
+        flags = int(getattr(self.config, "atlas_flags", 0) or 0)
+
+        def run():
+            out = ""
+            try:
+                atlas = getattr(self, "atlas", None)
+                if atlas is not None:
+                    atlas.configure(environment=env, trs_path=trs, flags=flags)
+                    atlas.set_direction(direction)
+                    res = atlas.translate(text)
+                    out = res.error or res.text or ""
+            except Exception as e:
+                out = f"ATLAS error: {e}"
+            self.atlas_done.emit(out)
+
+        threading.Thread(target=run, daemon=True, name="atlas-bridge").start()
+
+    def _on_atlas_done(self, text: str):
+        apane = getattr(self, "apane", None)
+        if apane is not None and getattr(apane, "edit", None) is not None:
+            apane.edit.setPlainText(text)

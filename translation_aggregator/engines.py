@@ -19,6 +19,7 @@ from .translators import (
     CaiyunTranslator,
     SystranTranslator,
     BabylonTranslator,
+    LecTranslator,
     OpenAICompatTranslator,
 )
 
@@ -36,6 +37,7 @@ TRANSLATOR_MAP: Dict[str, Type[Translator]] = {
     "caiyun": CaiyunTranslator,
     "systran": SystranTranslator,
     "babylon": BabylonTranslator,
+    "lec": LecTranslator,
     "openai": OpenAICompatTranslator,
 }
 
@@ -53,10 +55,11 @@ DISPLAY_NAMES = {
     "caiyun": "Caiyun",
     "systran": "Systran",
     "babylon": "Babylon",
+    "lec": "LEC",
     "openai": "OpenAI",
 }
 
-DEFAULT_ENABLED = ["google", "bing", "deepl", "yandex", "wwwjdic", "jisho", "babelfish", "papago", "caiyun", "systran", "babylon"]
+DEFAULT_ENABLED = ["google", "bing", "deepl", "yandex", "wwwjdic", "jisho", "babelfish", "papago", "caiyun", "systran", "babylon", "lec"]
 
 
 def make_translator(name: str, cfg: AppConfig | None = None) -> Translator:

@@ -10,6 +10,7 @@ from .papago import PapagoTranslator
 from .caiyun import CaiyunTranslator
 from .systran import SystranTranslator
 from .babylon import BabylonTranslator
+from .lec import LecTranslator
 from .openai_compat import OpenAICompatTranslator
 
 __all__ = [
@@ -26,5 +27,6 @@ __all__ = [
     "CaiyunTranslator",
     "SystranTranslator",
     "BabylonTranslator",
+    "LecTranslator",
     "OpenAICompatTranslator",
 ]
