@@ -169,6 +169,27 @@ class Stage1Window(MainWindow):
         self._worker = worker
         thread.start()
 
+    def closeEvent(self, event):
+        """Stop clipboard watching and join an in-flight engine run.
+
+        Without this, closing mid-translation destroys a QThread that is
+        still running, which aborts the process at teardown.
+        """
+        try:
+            self.clipboard_watcher.stop()
+        except Exception:
+            pass
+        thread = getattr(self, "_thread", None)
+        worker = getattr(self, "_worker", None)
+        if thread is not None and thread.isRunning():
+            if worker is not None:
+                worker._stop = True
+            thread.quit()
+            thread.wait(5000)
+        self._thread = None
+        self._worker = None
+        super().closeEvent(event)
+
     def _on_engine_done(self, title: str, text: str):
         pane = self.panes.get(title)
         if pane is None:
