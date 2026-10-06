@@ -318,6 +318,7 @@ class JParser:
         self._build_conj_table_postprocess()
         self._load_dictionaries()
         self._tag_verb_stems_from_remove_suffixes()  # emulate CreateDict verbType stem creation
+        self._dedupe_entries()
 
         self._mecab = None
         if self.use_mecab:
@@ -456,6 +457,28 @@ class JParser:
                                     bucket.append(ne)
                     break
 
+    def _dedupe_entries(self):
+        """Collapse entries stored several times under one surface.
+
+        Writing/reading indexing and the verb-stem tagging legitimately reach
+        the same dictionary line through multiple paths; the C++ dictionary
+        kept one slot per entry, so collapse identical (reading, gloss,
+        flags) copies and keep the first occurrence.
+        """
+        for surface, cands in self.entries.items():
+            if len(cands) < 2:
+                continue
+            seen = set()
+            uniq = []
+            for e in cands:
+                # _verb_type matters: stem tagging copies an entry under the
+                # same (reading, gloss, flags) but with a verb type attached
+                key = (e.get("reading"), e.get("gloss"), e.get("flags"), e.get("_verb_type") or 0)
+                if key not in seen:
+                    seen.add(key)
+                    uniq.append(e)
+            self.entries[surface] = uniq
+
     def _load_dict_file(self, path: Path):
         opener = gzip.open if path.suffix == ".gz" else open
         mode = "rt"
@@ -505,19 +528,27 @@ class JParser:
         if re.search(r"\b(name|given|place|surname)\b", gloss, re.I):
             flags |= 0x0001  # name-ish
 
+        entry = {"reading": reading, "gloss": gloss, "flags": flags}
         for w in writings:
-            entry = {"reading": reading, "gloss": gloss, "flags": flags}
             self.entries.setdefault(w, []).append(entry)
-            # also index the reading as a surface (for pure-kana lookup)
-            if reading and reading != w:
-                self.entries.setdefault(reading, []).append(entry)
+        # also index the reading as a surface (for pure-kana lookup) - once,
+        # not once per writing, or multi-writing lines store the entry twice
+        if reading and reading not in writings:
+            self.entries.setdefault(reading, []).append(entry)
 
     def _load_dictionaries(self):
         self.entries.clear()
         if not self.dict_dir.exists():
             return
-        for f in sorted(self.dict_dir.iterdir()):
-            if f.is_file() and (f.suffix in (".txt", ".gz") or "edict" in f.name.lower() or "enam" in f.name.lower()):
+        files = sorted(self.dict_dir.iterdir())
+        plain_names = {f.name for f in files if f.is_file()}
+        for f in files:
+            if not f.is_file():
+                continue
+            # a dictionary shipped both plain and .gz is the same data; load once
+            if f.suffix == ".gz" and f.name[:-3] in plain_names:
+                continue
+            if f.suffix in (".txt", ".gz") or "edict" in f.name.lower() or "enam" in f.name.lower():
                 if f.name.lower().startswith("conjugations"):
                     continue
                 try:
@@ -693,7 +724,20 @@ class JParser:
                           flags=e.get('flags',0), conj=conjs, inexact_match=inex, jap_flags=e.get('flags',0),
                           is_name=bool(e.get('flags',0) & 0x0001))
                 matches.append(m)
-        return matches
+
+        # The direct length loop and the conjugation-stripping loop can emit
+        # the same (jap, reading, gloss, conj) hit for one position; collapse
+        # exact duplicates so spans show distinct entries only.
+        seen = set()
+        uniq = []
+        for m in matches:
+            key = (m.start, m.len, m.jap, m.reading, m.gloss, m.flags,
+                   m.inexact_match,
+                   tuple((c.verb_type, c.verb_tense, c.verb_conj, c.verb_form) for c in m.conj))
+            if key not in seen:
+                seen.add(key)
+                uniq.append(m)
+        return uniq
 
     def _extend_with_verb_suffixes(self, text: str, base_start: int, base_len: int, base_inex: int, jap_flags: int, is_name: bool, base_reading: str = '', base_gloss: str = '') -> List[Match]:
         """Faithful port of the part of FindMatches that, after a base JapString hit, calls FindVerbMatches
@@ -909,11 +953,15 @@ class JParser:
 
     def _sort_matches(self, matches: List[Match]):
         """Exact port of SortMatches + CompareIdenticalMatches + CompareMatches (Dictionary.cpp ~1025)."""
-        # CompareIdenticalMatches qsort (by start, dictIndex, firstJString, then conj tuple)
+        # CompareIdenticalMatches qsort (by start, dictIndex, firstJString, then conj tuple).
+        # reading/gloss join the key so identical matches sort adjacent and the
+        # dedup loop below can collapse them (it only compares neighbors).
         matches.sort(key=lambda m: (
             m.start,
             getattr(m, 'dict_index', 0),
             getattr(m, 'firstJString', 0) or 0,   # not used in our Match; kept for parity
+            m.reading,
+            m.gloss,
             tuple((c.verb_type, c.verb_tense, c.verb_conj, c.verb_form) for c in m.conj) if m.conj else ()
         ))
 
