@@ -212,6 +212,20 @@ start.
 - Free web endpoints can rate-limit; each pane reports errors plainly
   and the others keep working.
 
+## Roadmap
+
+- **User-defined AI engine panes.** Add your own AI translator panes
+  from the GUI: point them at any OpenAI-style chat-completions API
+  and pick a model, so you can run several AI translators side by side
+  (different providers, different models, different prompts) — each
+  as its own pane with its own settings, alongside the built-in
+  engines.
+- **More AI provider APIs.** Support for other AI API styles beyond
+  OpenAI's — for example Anthropic's Messages API — so any AI
+  provider can be added as a translator pane.
+- More engines, more dictionaries, and per-pane translation history
+  browsing.
+
 ## Developing
 
 ```bash
