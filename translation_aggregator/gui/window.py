@@ -543,11 +543,9 @@ class TranslatorPane(QWidget):
         self.close_btn.show()
 
     def _close_clicked(self):
-        parent = self
-        while parent and not hasattr(parent, "clear_pane_selection"):
-            parent = parent.parent()
-        if parent and hasattr(parent, "clear_pane_selection"):
-            parent.clear_pane_selection(self)
+        mw = self._find_main_window()
+        if mw is not None and hasattr(mw, "close_pane"):
+            mw.close_pane(self)
         else:
             self.set_selected(False)
 
@@ -1234,6 +1232,12 @@ class MainWindow(QWidget):
             self.config.save()
         except Exception:
             pass
+        # The selector means "give me this layout": redistribute into the
+        # default arrangement (parsers first column, engines spread across
+        # the rest). Free placement by dragging persists across restarts.
+        self._layout_initialized = True
+        self._pane_memory.clear()
+        self.column_contents = self._default_columns(n)
         self._refresh_grid_layout()
 
     # --- pane placement (drag & drop between columns) ---
@@ -1301,6 +1305,33 @@ class MainWindow(QWidget):
         self.floating_panes.pop(pane.name, None)
         if pane not in [p for col in self.column_contents for p in col]:
             self.column_contents[0].append(pane)
+        self._refresh_grid_layout()
+
+    def close_pane(self, pane: TranslatorPane):
+        """Remove a pane for real: out of the layout and out of the saved
+        enabled-translator list, so it stays closed until re-enabled in
+        Settings (engine panes only; parser panes hide their close button)."""
+        key = getattr(pane, "_engine_key", None)
+        if key is None:
+            # not an engine pane: fall back to deselect only
+            self.clear_pane_selection(pane)
+            return
+        self._detach_pane(pane)
+        pane.hide()
+        pane.setParent(None)
+        if pane in self.pane_list:
+            self.pane_list.remove(pane)
+        if pane in self.grid_order:
+            self.grid_order.remove(pane)
+        if pane.name in self.panes:
+            del self.panes[pane.name]
+        self._pane_memory.pop(pane.name, None)
+        try:
+            enabled = [k for k in (self.config.enabled_translators or []) if k != key]
+            self.config.enabled_translators = enabled
+            self.config.save()
+        except Exception:
+            pass
         self._refresh_grid_layout()
 
     def closeEvent(self, event):
