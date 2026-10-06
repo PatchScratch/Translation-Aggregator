@@ -20,6 +20,45 @@ MIRRORS = [
 
 _BODY = re.compile(r"<body[^>]*>(.*)</body>", re.I | re.S)
 _TAG = re.compile(r"<[^>]+>")
+_BR = re.compile(r"<br\s*/?>", re.I)
+_UL = re.compile(r"<ul>(.*?)</ul>", re.I | re.S)
+_LI = re.compile(r"<li>(.*?)</li>", re.I | re.S)
+
+
+def _clean_fragment(fragment: str) -> str:
+    """HTML fragment -> plain text like the original TA pane.
+
+    <br> becomes a newline; remaining tags are dropped; runs of spaces and
+    tabs collapse to a single space; blank lines are dropped.
+    """
+    text = _BR.sub("\n", fragment)
+    text = _TAG.sub("", text)
+    text = unescape(text)
+    lines = [re.sub(r"[ \t]+", " ", line).strip() for line in text.split("\n")]
+    return "\n".join(line for line in lines if line)
+
+
+def _format_body(body: str) -> str:
+    """Structure the response like JdicWindow did.
+
+    The reply is a sequence of groups: an echoed sentence line followed by a
+    <ul> whose <li> items are one dictionary entry each (long input makes the
+    server emit several groups). Render each group as the sentence, a blank
+    line, then one entry per paragraph separated by blank lines.
+    """
+    blocks: list[str] = []
+    pos = 0
+    for ul in _UL.finditer(body):
+        sentence = _clean_fragment(body[pos:ul.start()])
+        entries = [e for e in (_clean_fragment(li) for li in _LI.findall(ul.group(1))) if e]
+        if entries:
+            block = (sentence + "\n\n\n" if sentence else "") + "\n\n".join(entries)
+        else:
+            block = sentence
+        if block:
+            blocks.append(block)
+        pos = ul.end()
+    return "\n\n".join(blocks).strip()
 
 
 class WwwjdicTranslator(Translator):
@@ -50,8 +89,7 @@ class WwwjdicTranslator(Translator):
             html = resp.text
             m = _BODY.search(html)
             body = m.group(1) if m else html
-            plain = unescape(_TAG.sub("", body))
-            plain = re.sub(r"\n{3,}", "\n\n", plain).strip()
+            plain = _format_body(body)
             return TranslationResult(self.name, src_code, dst_code, plain, raw=html[:2000])
         except Exception as e:
             return TranslationResult(self.name, src_code, dst_code, "", error=str(e))
