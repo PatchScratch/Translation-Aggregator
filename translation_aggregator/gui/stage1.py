@@ -1,6 +1,8 @@
 """Stage 1 GUI overlay: web engines + WWWJDIC + OpenAI. No ATLAS."""
 from __future__ import annotations
 
+import threading
+
 from PyQt6.QtCore import QObject, QThread, pyqtSignal
 from PyQt6.QtWidgets import QPushButton
 
@@ -23,17 +25,31 @@ class _EngineWorker(QObject):
         self._stop = False
 
     def run(self):
+        """Fan out every engine on its own thread; panes fill as each lands.
+
+        Engines are fully independent (fresh translator and HTTP client per
+        call), so they translate concurrently. The Playwright-based Baidu
+        engine serializes itself onto its persistent-browser thread.
+        """
+        threads = []
         for title, key in self.jobs:
             if self._stop:
                 break
-            try:
-                eng = make_translator(key, self.cfg)
-                res = eng.translate(self.text, src=self.src, dst=self.dst)
-                out = (res.error or res.text or "").strip()
-            except Exception as e:
-                out = str(e)
-            self.one_done.emit(title, out)
+            t = threading.Thread(target=self._run_one, args=(title, key), daemon=True)
+            t.start()
+            threads.append(t)
+        for t in threads:
+            t.join()
         self.finished.emit()
+
+    def _run_one(self, title: str, key: str):
+        try:
+            eng = make_translator(key, self.cfg)
+            res = eng.translate(self.text, src=self.src, dst=self.dst)
+            out = (res.error or res.text or "").strip()
+        except Exception as e:
+            out = str(e)
+        self.one_done.emit(title, out)
 
     def set_text(self, text: str):
         self.text = text
