@@ -19,7 +19,7 @@ def main(argv: List[str] | None = None) -> int:
         "-t",
         "--translators",
         default="google,bing,deepl,yandex,wwwjdic",
-        help="Comma list: google,bing,deepl,baidu,baidu_pw,yandex,wwwjdic,openai",
+        help="Comma list: google,bing,deepl,baidu,baidu_pw,yandex,wwwjdic,jisho,openai",
     )
     args = parser.parse_args(argv)
 
