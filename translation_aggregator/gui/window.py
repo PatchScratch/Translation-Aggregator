@@ -719,6 +719,34 @@ class _Column(QSplitter):
         event.acceptProposedAction()
 
 
+class _ColumnDropSpacer(QWidget):
+    """Drop-target child for an empty column.
+
+    A QSplitter with no children ignores setSizes (Qt clamps it to its
+    minimum and gives the space to its siblings), so an empty column both
+    renders as a sliver and cannot be rebalanced. Giving it this spacer
+    child restores normal sizing; it also carries the dashed drop-zone
+    outline and forwards drag&drop to the column.
+    """
+
+    def __init__(self, column: "_Column", parent=None):
+        super().__init__(parent)
+        self._column = column
+        self.setAcceptDrops(True)
+        self.setStyleSheet(
+            "border: 1px dashed #888888; border-radius: 4px;"
+        )
+
+    def dragEnterEvent(self, event):
+        self._column.dragEnterEvent(event)
+
+    def dragMoveEvent(self, event):
+        self._column.dragMoveEvent(event)
+
+    def dropEvent(self, event):
+        self._column.dropEvent(event)
+
+
 class _PaneFloatWindow(QWidget):
     """Owns a pane dragged out of the main window; closing re-docks it.
 
@@ -1189,19 +1217,28 @@ class MainWindow(QWidget):
         for c in range(n):
             col = split.widget(c)
             while col.count():
-                col.widget(0).setParent(None)
+                w = col.widget(0)
+                w.setParent(None)
+                if isinstance(w, _ColumnDropSpacer):
+                    w.deleteLater()
             for p in self.column_contents[c]:
                 col.addWidget(p)
                 p.setVisible(True)
                 p.show()
-            # an empty column is a drop target: make it look like one
+            # empty column: keep a drop-zone child so the column sizes and
+            # rebalances like any other (see _ColumnDropSpacer)
             if not self.column_contents[c]:
-                col.setStyleSheet(
-                    "QSplitter { border: 1px dashed #888888; "
-                    "border-radius: 4px; }"
-                )
-            else:
-                col.setStyleSheet("")
+                col.addWidget(_ColumnDropSpacer(col))
+
+        # A layout with an empty column must not let it sit as a minimum-width
+        # sliver (restored arrangements land that way, and after closing a
+        # column's last pane): nobody can drop into a 240px strip. Rebalance
+        # whenever an empty column coexists with filled ones; balanced filled
+        # layouts keep the sizes the user dragged.
+        n_cols = split.count()
+        if n_cols > 1 and any(not col for col in self.column_contents) and any(self.column_contents):
+            total = max(split.width(), 200 * n_cols)
+            split.setSizes([total // n_cols] * n_cols)
 
         # keep grid_order (flat, docked first) valid for consumers
         self.grid_order = [p for col in self.column_contents for p in col]
