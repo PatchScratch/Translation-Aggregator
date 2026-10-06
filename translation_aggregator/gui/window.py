@@ -1617,7 +1617,13 @@ class MainWindow(QWidget):
             "About Translation Aggregator",
             f"<h3>Translation Aggregator</h3>"
             f"<p>Version {ver}</p>"
-            f"<p>Cross-platform Python port of the classic Translation Aggregator.</p>"
+            f"<p>A modern, cross-platform rebuild of the classic Translation "
+            f"Aggregator that goes beyond the original: 15 translation "
+            f"engines including local ATLAS and LEC, parallel translation, "
+            f"per-engine settings, tear-off panes, flexible column layouts, "
+            f"clipboard auto-translation, history navigation, and "
+            f"System/Light/Dark themes. Everything the original did — "
+            f"except text hooking.</p>"
             f"<p><a href='{GITHUB_URL}'>{GITHUB_URL}</a></p>"
             f"<p>GPL-2.0-or-later</p>",
         )
