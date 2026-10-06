@@ -1,3 +1,5 @@
+"""All engine classes. engines.py is the registry mapping engine keys to these."""
+
 from .google import GoogleTranslator
 from .bing import BingTranslator
 from .deepl import DeepLTranslator

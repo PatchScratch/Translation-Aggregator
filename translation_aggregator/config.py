@@ -1,3 +1,5 @@
+"""AppConfig: persisted settings, written as JSON (classic .ini filename also honored). Loaded once at import as `config`."""
+
 from __future__ import annotations
 
 import json

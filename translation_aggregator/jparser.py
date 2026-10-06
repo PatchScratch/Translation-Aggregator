@@ -1,3 +1,5 @@
+"""Pure-Python reimplementation of the original TA JParser: edict2/enamdict loading, conjugation handling, and the FindBestMatches DP segmentation."""
+
 from __future__ import annotations
 
 import gzip

@@ -1,3 +1,5 @@
+"""`transagg` command line: translate one text through a comma list of engines and print each result."""
+
 from __future__ import annotations
 
 import argparse

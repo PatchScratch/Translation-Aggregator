@@ -1,3 +1,5 @@
+"""Settings dialog for the ATLAS pane (environment, rule set, flags)."""
+
 from __future__ import annotations
 
 import os

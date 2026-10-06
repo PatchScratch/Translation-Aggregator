@@ -1,3 +1,5 @@
+"""Bing (Microsoft Translator) web translator: one persistent cookie-carrying client against the browser endpoint."""
+
 from __future__ import annotations
 
 import re

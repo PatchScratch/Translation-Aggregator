@@ -1,3 +1,5 @@
+"""DeepL: official API mode (key required) or free web mode (splitting text and replaying the site's own request shape)."""
+
 from __future__ import annotations
 
 import json

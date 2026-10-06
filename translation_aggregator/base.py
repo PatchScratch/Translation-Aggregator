@@ -1,3 +1,5 @@
+"""Shared engine interface: Language codes, TranslationResult, and the Translator base class every engine implements."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

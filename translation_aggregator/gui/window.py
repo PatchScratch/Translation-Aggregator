@@ -1,3 +1,5 @@
+"""Main window: panes and column layout, drag & drop, tear-off windows, clipboard watcher, menu actions, ATLAS engine, theming."""
+
 from __future__ import annotations
 
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer, QMimeData, QThread, pyqtSignal as _pyqtSignal, QPoint, QEvent, QSize, QRect

@@ -1,3 +1,5 @@
+"""Yandex web translator: scrape a session id from the page (plain client UA first - browser UAs get a captcha wall), then post to the tr.json endpoint with Referer headers."""
+
 from __future__ import annotations
 
 import re

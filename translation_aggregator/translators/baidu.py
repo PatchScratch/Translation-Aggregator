@@ -1,3 +1,5 @@
+"""Baidu translator: Playwright backend (one persistent Chromium on a worker thread, poll the rendered result) with a plain-HTTP fallback that usually cannot pass the JS-only page."""
+
 from __future__ import annotations
 
 import queue

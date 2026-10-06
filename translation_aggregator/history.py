@@ -1,3 +1,5 @@
+"""HistoryStore: saved translation results on disk (recent() feed). The menu's Back/Forward navigation uses its own source-text ring in the GUI."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

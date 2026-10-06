@@ -1,3 +1,5 @@
+"""GUI entry point (`transagg-gui`): QApplication, color scheme, tooltip palette, Stage1Window."""
+
 from __future__ import annotations
 
 from PyQt6.QtWidgets import QApplication

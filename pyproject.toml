@@ -2,7 +2,7 @@
 name = "translation-aggregator"
 version = "0.2.0"
 description = "Cross-platform Python port of Translation Aggregator (web translators + JParser + MeCab + ATLAS via Wine)"
-readme = "README_PYTHON.md"
+readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "GPL-2.0-or-later"}
 

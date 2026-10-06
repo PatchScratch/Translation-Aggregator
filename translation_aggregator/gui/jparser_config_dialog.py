@@ -1,3 +1,5 @@
+"""Settings dialog for the JParser pane (furigana mode, colors, font sizes, gloss flags)."""
+
 from __future__ import annotations
 
 from PyQt6.QtCore import Qt
