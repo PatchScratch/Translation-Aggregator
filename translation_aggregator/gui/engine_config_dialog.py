@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QLineEdit, QDialogButtonBox,
-    QGroupBox, QRadioButton,
+    QGroupBox, QRadioButton, QComboBox,
 )
 
 from ..config import AppConfig
@@ -63,9 +63,16 @@ class WwwjdicEngineDialog(QDialog):
         layout = QVBoxLayout(self)
         g = QGroupBox("WWWJDIC")
         l = QVBoxLayout(g)
-        self.mirror = QLineEdit(getattr(cfg, "wwwjdic_mirror", DEFAULT_MIRROR))
-        self.mirror.setPlaceholderText(DEFAULT_MIRROR)
-        l.addWidget(QLabel("Mirror URL (known: " + ", ".join(MIRRORS[:2]) + ", …)"))
+        l.addWidget(QLabel("Mirror"))
+        self.mirror = QComboBox()
+        self.mirror.setEditable(True)  # custom mirrors stay possible
+        self.mirror.addItems(MIRRORS)
+        current = getattr(cfg, "wwwjdic_mirror", DEFAULT_MIRROR) or DEFAULT_MIRROR
+        idx = self.mirror.findText(current)
+        if idx >= 0:
+            self.mirror.setCurrentIndex(idx)
+        elif current:
+            self.mirror.setEditText(current)
         l.addWidget(self.mirror)
         layout.addWidget(g)
 
@@ -75,7 +82,7 @@ class WwwjdicEngineDialog(QDialog):
         layout.addWidget(bb)
 
     def accept(self):
-        self.cfg.wwwjdic_mirror = self.mirror.text().strip() or DEFAULT_MIRROR
+        self.cfg.wwwjdic_mirror = self.mirror.currentText().strip() or DEFAULT_MIRROR
         super().accept()
 
 

@@ -13,9 +13,8 @@ from ..base import Translator, Language, TranslationResult
 DEFAULT_MIRROR = "https://www.edrdg.org/cgi-bin/wwwjdic/wwwjdic"
 MIRRORS = [
     "https://www.edrdg.org/cgi-bin/wwwjdic/wwwjdic",
-    "http://wwwjdic.se/cgi-bin/wwwjdic.cgi",
-    "http://wwwjdic.biz/cgi-bin/wwwjdic",
-    "https://gengo.com/wwwjdic/cgi-data/wwwjdic",
+    "http://wwwjdic.se/cgi-bin/wwwjdic.cgi?1C",
+    "http://wwwjdic.biz/cgi-bin/wwwjdic?1C",
 ]
 
 _BODY = re.compile(r"<body[^>]*>(.*)</body>", re.I | re.S)
@@ -66,7 +65,7 @@ class WwwjdicTranslator(Translator):
 
     def __init__(self, mirror: str = DEFAULT_MIRROR, client: Optional[httpx.Client] = None):
         super().__init__()
-        self.mirror = (mirror or DEFAULT_MIRROR).rstrip("?/")
+        self.mirror = (mirror or DEFAULT_MIRROR).strip()
         self.client = client or httpx.Client(timeout=20.0, follow_redirects=True)
 
     def can_translate(self, src: Language | str, dst: Language | str) -> bool:
@@ -82,7 +81,10 @@ class WwwjdicTranslator(Translator):
         dst_code = self._get_lang(dst, Language.English)
         if not text.strip():
             return TranslationResult(self.name, src_code, dst_code, "")
-        url = f"{self.mirror}?9ZIG{quote(text, safe='')}"
+        # Mirrors may carry their own query (e.g. "...?1C"); the command
+        # string we append replaces it, so keep only the script path.
+        base = self.mirror.split("?", 1)[0].rstrip("/")
+        url = f"{base}?9ZIG{quote(text, safe='')}"
         try:
             resp = self.client.get(url, headers={"User-Agent": "TranslationAggregator/0.2"})
             resp.raise_for_status()
