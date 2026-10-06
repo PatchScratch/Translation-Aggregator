@@ -14,6 +14,7 @@ from .translators import (
     YandexTranslator,
     WwwjdicTranslator,
     JishoTranslator,
+    BabelfishTranslator,
     OpenAICompatTranslator,
 )
 
@@ -26,6 +27,7 @@ TRANSLATOR_MAP: Dict[str, Type[Translator]] = {
     "yandex": YandexTranslator,
     "wwwjdic": WwwjdicTranslator,
     "jisho": JishoTranslator,
+    "babelfish": BabelfishTranslator,
     "openai": OpenAICompatTranslator,
 }
 
@@ -38,10 +40,11 @@ DISPLAY_NAMES = {
     "yandex": "Yandex",
     "wwwjdic": "WWWJDIC",
     "jisho": "Jisho",
+    "babelfish": "Babelfish",
     "openai": "OpenAI",
 }
 
-DEFAULT_ENABLED = ["google", "bing", "deepl", "yandex", "wwwjdic", "jisho"]
+DEFAULT_ENABLED = ["google", "bing", "deepl", "yandex", "wwwjdic", "jisho", "babelfish"]
 
 
 def make_translator(name: str, cfg: AppConfig | None = None) -> Translator:
