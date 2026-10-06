@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Dict, List, Any
@@ -149,3 +150,11 @@ class AppConfig:
 
 
 config = AppConfig.load()
+
+# Frozen (PyInstaller) builds bundle the dictionaries inside the exe;
+# resolve the default relative dictionary directory to them. An absolute
+# path or an explicitly configured directory always wins.
+if getattr(sys, "frozen", False) and config.dictionaries_dir == "dictionaries":
+    _bundled = Path(getattr(sys, "_MEIPASS", "")) / "dictionaries"
+    if _bundled.is_dir():
+        config.dictionaries_dir = str(_bundled)
