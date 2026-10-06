@@ -51,7 +51,7 @@ class Stage1Window(MainWindow):
         self._add_settings_button()
         self._hide_atlas()
         self._load_web_engines()
-        self._refresh_grid_layout()
+        self._sync_parser_panes()
 
     def _add_settings_button(self):
         btn = QPushButton("Settings")
@@ -70,6 +70,7 @@ class Stage1Window(MainWindow):
         self.config.save()
         self.refresh_theme()
         self._rebuild_engine_panes()
+        self._sync_parser_panes()
 
     def _rebuild_engine_panes(self):
         # Tear-off windows must go first: their panes rejoin the rebuild,

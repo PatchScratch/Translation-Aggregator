@@ -71,6 +71,8 @@ class AppConfig:
 
     gui_columns: int = 2
     gui_color_scheme: str = "system"  # system | light | dark
+    show_jparser: bool = True
+    show_mecab: bool = True
 
     deepl_mode: str = "free"
     deepl_api_key: str = ""

@@ -55,6 +55,12 @@ class ConfigDialog(QDialog):
             cb.setChecked(name in self.cfg.enabled_translators)
             self.trans_checks[name] = cb
             l3.addWidget(cb)
+        self.cb_jparser = QCheckBox("JParser")
+        self.cb_jparser.setChecked(bool(getattr(self.cfg, "show_jparser", True)))
+        self.cb_mecab = QCheckBox("MeCab")
+        self.cb_mecab.setChecked(bool(getattr(self.cfg, "show_mecab", True)))
+        l3.addWidget(self.cb_jparser)
+        l3.addWidget(self.cb_mecab)
         layout.addWidget(g3)
 
         g4 = QGroupBox("Paths")
@@ -78,6 +84,8 @@ class ConfigDialog(QDialog):
         self.cfg.gui_color_scheme = self.combo_scheme.currentData() or "system"
         enabled = [n for n, cb in self.trans_checks.items() if cb.isChecked()]
         self.cfg.enabled_translators = enabled or ["google"]
+        self.cfg.show_jparser = self.cb_jparser.isChecked()
+        self.cfg.show_mecab = self.cb_mecab.isChecked()
         self.cfg.dictionaries_dir = self.dict_dir.text().strip() or "dictionaries"
         self.cfg.mecab_path = self.mecab_path.text().strip()
         super().accept()

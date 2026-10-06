@@ -383,10 +383,6 @@ class TranslatorPane(QWidget):
         self.close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.close_btn.clicked.connect(self._close_clicked)
         hl.addWidget(self.close_btn)
-        if self.name in ("JParser", "MeCab", "ATLAS"):
-            self.close_btn.hide()
-        else:
-            self.close_btn.show()
         self.layout().addWidget(header)
         self.header = header
         header.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
@@ -566,12 +562,7 @@ class TranslatorPane(QWidget):
     def set_selected(self, selected: bool):
         self._selected = selected
         self.setStyleSheet(theme.pane_qss())
-        if self.name in ("JParser", "MeCab", "ATLAS"):
-            self.label.setText(self.name)
-            self.close_btn.hide()
-            return
         self.label.setText(self.name)
-        self.close_btn.show()
 
     def _close_clicked(self):
         mw = self._find_main_window()
@@ -1419,13 +1410,32 @@ class MainWindow(QWidget):
 
     def close_pane(self, pane: TranslatorPane):
         """Remove a pane for real: out of the layout and out of the saved
-        enabled-translator list, so it stays closed until re-enabled in
-        Settings (engine panes only; parser panes hide their close button)."""
+        settings, so it stays closed until re-enabled in Settings. Engine
+        panes persist via enabled_translators; the parser panes via their
+        show_* flags (position memory is kept so they return to their spot)."""
         key = getattr(pane, "_engine_key", None)
-        if key is None:
-            # not an engine pane: fall back to deselect only
-            self.clear_pane_selection(pane)
+        if key is not None:
+            self._detach_pane(pane)
+            pane.hide()
+            pane.setParent(None)
+            if pane in self.pane_list:
+                self.pane_list.remove(pane)
+            if pane in self.grid_order:
+                self.grid_order.remove(pane)
+            if pane.name in self.panes:
+                del self.panes[pane.name]
+            self._pane_memory.pop(pane.name, None)
+            try:
+                enabled = [k for k in (self.config.enabled_translators or []) if k != key]
+                self.config.enabled_translators = enabled
+                self.config.save()
+            except Exception:
+                pass
+            self._refresh_grid_layout()
             return
+
+        # parser panes (JParser / MeCab / ATLAS)
+        flag = {"JParser": "show_jparser", "MeCab": "show_mecab"}.get(pane.name)
         self._detach_pane(pane)
         pane.hide()
         pane.setParent(None)
@@ -1433,15 +1443,32 @@ class MainWindow(QWidget):
             self.pane_list.remove(pane)
         if pane in self.grid_order:
             self.grid_order.remove(pane)
-        if pane.name in self.panes:
-            del self.panes[pane.name]
-        self._pane_memory.pop(pane.name, None)
-        try:
-            enabled = [k for k in (self.config.enabled_translators or []) if k != key]
-            self.config.enabled_translators = enabled
-            self.config.save()
-        except Exception:
-            pass
+        if flag:
+            try:
+                setattr(self.config, flag, False)
+                self.config.save()
+            except Exception:
+                pass
+        self._refresh_grid_layout()
+
+    def _sync_parser_panes(self):
+        """Show/hide the parser panes according to the config flags."""
+        for attr, flag in (("jpane", "show_jparser"), ("mpane", "show_mecab")):
+            pane = getattr(self, attr, None)
+            if pane is None:
+                continue
+            want = bool(getattr(self.config, flag, True))
+            registered = pane in self.pane_list
+            if want and not registered:
+                self._register_pane(pane)
+            elif not want and registered:
+                self._detach_pane(pane)
+                pane.hide()
+                pane.setParent(None)
+                if pane in self.pane_list:
+                    self.pane_list.remove(pane)
+                if pane in self.grid_order:
+                    self.grid_order.remove(pane)
         self._refresh_grid_layout()
 
     def closeEvent(self, event):
