@@ -1194,6 +1194,14 @@ class MainWindow(QWidget):
                 col.addWidget(p)
                 p.setVisible(True)
                 p.show()
+            # an empty column is a drop target: make it look like one
+            if not self.column_contents[c]:
+                col.setStyleSheet(
+                    "QSplitter { border: 1px dashed #888888; "
+                    "border-radius: 4px; }"
+                )
+            else:
+                col.setStyleSheet("")
 
         # keep grid_order (flat, docked first) valid for consumers
         self.grid_order = [p for col in self.column_contents for p in col]
@@ -1275,13 +1283,27 @@ class MainWindow(QWidget):
             self.config.save()
         except Exception:
             pass
-        # The selector means "give me this layout": redistribute into the
-        # default arrangement (parsers first column, engines spread across
-        # the rest). Free placement by dragging persists across restarts.
+        # Split the current arrangement (top-to-bottom reading order) into
+        # contiguous chunks - one per column - so pane order the user built
+        # by dragging survives the count change. Only a fresh start (no
+        # arrangement yet) uses the parser/engine default distribution.
         self._layout_initialized = True
+        flat = [p for col in self.column_contents for p in col]
+        if flat:
+            base, extra = divmod(len(flat), n)
+            cols: list[list[TranslatorPane]] = []
+            i = 0
+            for c in range(n):
+                take = base + (1 if c < extra else 0)
+                cols.append(flat[i:i + take])
+                i += take
+            self.column_contents = cols
         self._pane_memory.clear()
-        self.column_contents = self._default_columns(n)
         self._refresh_grid_layout()
+        # rebalance: freshly added columns otherwise come up at their
+        # minimum width and the layout looks broken
+        total = max(self.columns_splitter.width(), 200 * n)
+        self.columns_splitter.setSizes([total // n] * n)
 
     # --- pane placement (drag & drop between columns) ---
 
