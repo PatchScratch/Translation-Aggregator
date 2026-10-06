@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import threading
 
-from PyQt6.QtCore import QObject, QThread, pyqtSignal
+from PyQt6.QtCore import QObject, QThread, Qt, pyqtSignal
 from PyQt6.QtWidgets import QPushButton
 
 from ..engines import TRANSLATOR_MAP, make_translator, DISPLAY_NAMES
@@ -70,6 +70,18 @@ class Stage1Window(MainWindow):
         self._load_web_engines()
         self._sync_parser_panes()
         self.atlas_done.connect(self._on_atlas_done)
+
+        # menu bar (File / View / Tools / Help) - original TA parity
+        from .menubar import build_menu_bar
+        self.menu_bar = build_menu_bar(self)
+        self.layout().setContentsMargins(4, 0, 4, 4)
+        self.layout().insertWidget(0, self.menu_bar)
+
+        # apply persisted view state
+        if self.topmost:
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
+        self.setWindowOpacity(self.opacity)
+        self._apply_pane_font()
 
     def _add_settings_button(self):
         btn = QPushButton("Settings")
@@ -156,13 +168,19 @@ class Stage1Window(MainWindow):
             # (make_translator in the worker), so the new values apply
             # on the next translation without rebuilding the panes.
 
-    def _on_translate_clicked(self):
+    def _on_translate_clicked(self, from_history: bool = False):
+        # record the submission even when a run is busy (idempotent) - but
+        # never when we are replaying a history navigation
+        if not from_history:
+            self._history_push_current()
         if self._thread is not None and self._thread.isRunning():
             # Busy: remember the latest text and translate it when this run
             # finishes, so fast clipboard changes are not dropped.
             self._queued_text = self.src_edit.toPlainText().strip()
+            self._queued_from_history = from_history
             return
         self._queued_text = None
+        self._queued_from_history = False
         self._refresh_jparser_from_source()
         self._refresh_mecab_from_source()
         self._refresh_atlas_from_source()
@@ -230,10 +248,12 @@ class Stage1Window(MainWindow):
         self._thread = None
         self._worker = None
         queued = getattr(self, "_queued_text", None)
+        queued_from_history = getattr(self, "_queued_from_history", False)
         self._queued_text = None
+        self._queued_from_history = False
         if queued:
             # A newer text arrived while the last run was in flight
-            self._on_translate_clicked()
+            self._on_translate_clicked(from_history=queued_from_history)
 
     def _refresh_atlas_from_source(self):
         """ATLAS runs through a 32-bit bridge subprocess (~1-3 s), so do the

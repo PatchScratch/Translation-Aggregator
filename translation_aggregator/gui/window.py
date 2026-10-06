@@ -328,6 +328,7 @@ from ..atlas import AtlasEngine
 from ..config import config
 from ..history import HistoryStore
 from . import theme
+from .menubar import GITHUB_URL
 
 
 TRANSLATOR_MAP = {
@@ -793,8 +794,14 @@ class MainWindow(QWidget):
         self.config = config
         self.history = HistoryStore()
 
-        self.src_lang = Language.Japanese
-        self.dst_lang = Language.English
+        try:
+            self.src_lang = Language(getattr(config, "lang_src", "ja") or "ja")
+        except ValueError:
+            self.src_lang = Language.Japanese
+        try:
+            self.dst_lang = Language(getattr(config, "lang_dst", "en") or "en")
+        except ValueError:
+            self.dst_lang = Language.English
 
         self.clipboard_watcher = QTimer(self)
         self.clipboard_watcher.timeout.connect(self._check_clipboard)
@@ -803,6 +810,13 @@ class MainWindow(QWidget):
 
         self.translators = []
         self.panes: dict[str, TranslatorPane] = {}
+
+        # menu-backed state (persisted where it makes sense)
+        self.topmost = bool(getattr(config, "gui_topmost", False))
+        self.opacity = float(getattr(config, "gui_opacity", 1.0) or 1.0)
+        self.lock_order = bool(getattr(config, "gui_lock_order", False))
+        self._src_history: list[str] = []
+        self._src_history_idx = -1
 
         # Selection / grid state must exist before _build_ui (which calls _rebuild_columns)
         self.selected_panes: set[TranslatorPane] = set()
@@ -1366,6 +1380,8 @@ class MainWindow(QWidget):
             fw.close()
 
     def _move_pane(self, src_name: str, col_idx: int, index: int):
+        if getattr(self, "lock_order", False):
+            return
         src = next((p for p in self.pane_list if p.name == src_name), None)
         if src is None:
             return
@@ -1434,6 +1450,178 @@ class MainWindow(QWidget):
         for fw in self.floating_panes.values():
             fw.setStyleSheet(theme.float_window_qss())
 
+    # ---------- menu actions (see gui/menubar.py) ----------
+
+    def _toggle_topmost(self, on: bool):
+        self.topmost = bool(on)
+        try:
+            self.config.gui_topmost = self.topmost
+            self.config.save()
+        except Exception:
+            pass
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, self.topmost)
+        self.show()
+
+    def _set_opacity(self, value: float):
+        self.opacity = max(0.1, min(1.0, float(value)))
+        try:
+            self.config.gui_opacity = self.opacity
+            self.config.save()
+        except Exception:
+            pass
+        self.setWindowOpacity(self.opacity)
+
+    def _toggle_lock_order(self, on: bool):
+        self.lock_order = bool(on)
+        try:
+            self.config.gui_lock_order = self.lock_order
+            self.config.save()
+        except Exception:
+            pass
+
+    def _choose_pane_font(self):
+        from PyQt6.QtWidgets import QFontDialog
+        from PyQt6.QtGui import QFont
+        family = getattr(self.config, "pane_font_family", "") or ""
+        size = int(getattr(self.config, "pane_font_size", 0) or 0)
+        current = QFont(family) if family else QFont()
+        if size:
+            current.setPointSize(size)
+        font, ok = QFontDialog.getFont(current, self)
+        if not ok:
+            return
+        self.config.pane_font_family = font.family()
+        self.config.pane_font_size = font.pointSize()
+        try:
+            self.config.save()
+        except Exception:
+            pass
+        self._apply_pane_font()
+
+    def _apply_pane_font(self):
+        from PyQt6.QtGui import QFont
+        family = getattr(self.config, "pane_font_family", "") or ""
+        size = int(getattr(self.config, "pane_font_size", 0) or 0)
+        if not family:
+            return
+        font = QFont(family)
+        if size:
+            font.setPointSize(size)
+        for p in self.pane_list:
+            if getattr(p, "edit", None) is not None:
+                p.edit.setFont(font)
+            if getattr(p, "label", None) is not None:
+                p.label.setFont(font)
+
+    def _show_all_panes(self):
+        from ..engines import TRANSLATOR_MAP
+        self.config.enabled_translators = list(TRANSLATOR_MAP.keys())
+        self.config.show_jparser = True
+        self.config.show_mecab = True
+        try:
+            self.config.save()
+        except Exception:
+            pass
+        rebuild = getattr(self, "_rebuild_engine_panes", None)
+        if callable(rebuild):
+            rebuild()
+        sync = getattr(self, "_sync_parser_panes", None)
+        if callable(sync):
+            sync()
+
+    def _set_src_lang(self, lang):
+        self.src_lang = lang
+        try:
+            self.config.lang_src = str(lang)
+            self.config.save()
+        except Exception:
+            pass
+        self._history_push_current()
+        self._on_translate_clicked()
+
+    def _set_dst_lang(self, lang):
+        self.dst_lang = lang
+        try:
+            self.config.lang_dst = str(lang)
+            self.config.save()
+        except Exception:
+            pass
+        self._on_translate_clicked()
+
+    def _convert_source(self, fn_name: str):
+        from ..jparser import to_hiragana, to_katakana, to_romaji
+        fn = {"to_hiragana": to_hiragana, "to_katakana": to_katakana,
+              "to_romaji": to_romaji}.get(fn_name)
+        if fn is None:
+            return
+        try:
+            text = self.src_edit.toPlainText()
+        except Exception:
+            return
+        if text:
+            self.src_edit.setPlainText(fn(text))
+
+    def _history_push_current(self):
+        try:
+            text = self.src_edit.toPlainText().strip()
+        except Exception:
+            return
+        if not text:
+            return
+        # navigation pointer must be at the end before appending
+        if self._src_history_idx < len(self._src_history) - 1:
+            self._src_history = self._src_history[: self._src_history_idx + 1]
+        if not self._src_history or self._src_history[-1] != text:
+            self._src_history.append(text)
+            if len(self._src_history) > 200:
+                self._src_history.pop(0)
+        self._src_history_idx = len(self._src_history) - 1
+
+    def _history_back(self):
+        # no push here: the current text is a recorded entry during
+        # navigation, and pushing it would truncate the forward stack
+        if self._src_history_idx > 0:
+            self._src_history_idx -= 1
+            self._load_history_entry()
+
+    def _history_forward(self):
+        if self._src_history_idx < len(self._src_history) - 1:
+            self._src_history_idx += 1
+            self._load_history_entry()
+
+    def _load_history_entry(self):
+        if 0 <= self._src_history_idx < len(self._src_history):
+            # loading an entry re-translates; that must not truncate the
+            # forward history as if it were a new submission
+            self.src_edit.setPlainText(self._src_history[self._src_history_idx])
+            self._on_translate_clicked(from_history=True)
+
+    def _clear_history(self):
+        self._src_history = []
+        self._src_history_idx = -1
+        try:
+            self.history.entries.clear()
+            self.history.save()
+        except Exception:
+            pass
+
+    def _about_dialog(self):
+        from PyQt6.QtWidgets import QMessageBox
+        try:
+            from importlib.metadata import version as pkg_version
+            ver = pkg_version("translation-aggregator")
+        except Exception:
+            ver = "dev"
+        QMessageBox.about(
+            self,
+            "About Translation Aggregator",
+            f"<h3>Translation Aggregator</h3>"
+            f"<p>Version {ver}</p>"
+            f"<p>Cross-platform Python port of the classic Translation Aggregator.</p>"
+            f"<p><a href='{GITHUB_URL}'>{GITHUB_URL}</a></p>"
+            f"<p>GPL-2.0-or-later</p>",
+        )
+
     def _close_float_windows(self):
         """Close every tear-off window, detaching its pane safely first.
 
@@ -1451,6 +1639,8 @@ class MainWindow(QWidget):
         self.floating_panes.clear()
 
     def float_pane(self, pane: TranslatorPane):
+        if getattr(self, "lock_order", False):
+            return
         if pane.name in self.floating_panes:
             return
         self._detach_pane(pane)

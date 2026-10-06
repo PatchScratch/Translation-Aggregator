@@ -71,6 +71,11 @@ class AppConfig:
 
     gui_columns: int = 2
     gui_color_scheme: str = "system"  # system | light | dark
+    gui_topmost: bool = False
+    gui_opacity: float = 1.0
+    gui_lock_order: bool = False
+    pane_font_family: str = ""
+    pane_font_size: int = 0
     show_jparser: bool = True
     show_mecab: bool = True
 
