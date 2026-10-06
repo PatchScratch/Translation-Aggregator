@@ -475,11 +475,17 @@ class TranslatorPane(QWidget):
             _self._drag_start_pos = None
             if action == Qt.DropAction.IgnoreAction:
                 # dropped outside any drop target: if that means outside the
-                # main window, tear the pane off into its own window
-                from PyQt6.QtGui import QCursor
-                mw = _self._find_main_window()
-                if mw is not None and not mw.geometry().contains(QCursor.pos()):
-                    mw.float_pane(_self)
+                # main window, tear the pane off into its own window.
+                # PyQt6 aborts the app on exceptions raised from event
+                # handlers, so log instead of letting one escape.
+                try:
+                    from PyQt6.QtGui import QCursor
+                    mw = _self._find_main_window()
+                    if mw is not None and not mw.geometry().contains(QCursor.pos()):
+                        mw.float_pane(_self)
+                except Exception:
+                    import traceback
+                    traceback.print_exc()
 
         def _release(e):
             start = _self._drag_start_pos
@@ -489,9 +495,14 @@ class TranslatorPane(QWidget):
             if fw is not None and start is not None and gstart is not None:
                 moved = (e.globalPosition().toPoint() - gstart).manhattanLength() >= 8
                 if moved:
-                    mw = _self._find_main_window()
-                    if mw is not None:
-                        mw.dock_pane_at_cursor(_self)
+                    # see _move: never let an exception escape an event handler
+                    try:
+                        mw = _self._find_main_window()
+                        if mw is not None:
+                            mw.dock_pane_at_cursor(_self)
+                    except Exception:
+                        import traceback
+                        traceback.print_exc()
 
         self.header.mousePressEvent = _press
         self.header.mouseMoveEvent = _move
@@ -668,6 +679,7 @@ class TranslatorPane(QWidget):
         return p if isinstance(p, _PaneFloatWindow) else None
 
     def _find_main_window(self):
+        p = self
         while p:
             if isinstance(p, MainWindow):
                 return p
