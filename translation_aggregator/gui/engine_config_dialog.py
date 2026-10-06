@@ -126,6 +126,38 @@ class OpenAIEngineDialog(QDialog):
         super().accept()
 
 
+class CaiyunEngineDialog(QDialog):
+    def __init__(self, parent, cfg: AppConfig):
+        super().__init__(parent)
+        self.setWindowTitle("Caiyun Settings")
+        self.cfg = cfg
+
+        layout = QVBoxLayout(self)
+        g = QGroupBox("Caiyun (彩云小译)")
+        l = QVBoxLayout(g)
+        l.addWidget(QLabel("API token"))
+        self.key = QLineEdit(getattr(cfg, "caiyun_api_key", "") or "")
+        self.key.setEchoMode(QLineEdit.EchoMode.Password)
+        self.key.setPlaceholderText("Defaults to the test token from the docs")
+        l.addWidget(self.key)
+        l.addWidget(QLabel(
+            "The default is the shared test token published in the Caiyun API "
+            "docs (availability not guaranteed). Register at "
+            "dashboard.caiyunapp.com for a free token (1M characters/month) "
+            "and paste it here."
+        ))
+        layout.addWidget(g)
+
+        bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        bb.accepted.connect(self.accept)
+        bb.rejected.connect(self.reject)
+        layout.addWidget(bb)
+
+    def accept(self):
+        self.cfg.caiyun_api_key = self.key.text().strip()
+        super().accept()
+
+
 # Which engines have a settings dialog for their pane's gear button.
 # Engines without related settings (google, bing, yandex, baidu, ...) get no
 # gear; add a class here when they grow options.
@@ -133,4 +165,5 @@ ENGINE_CONFIG_DIALOGS = {
     "deepl": DeepLEngineDialog,
     "wwwjdic": WwwjdicEngineDialog,
     "openai": OpenAIEngineDialog,
+    "caiyun": CaiyunEngineDialog,
 }

@@ -16,6 +16,7 @@ from .translators import (
     JishoTranslator,
     BabelfishTranslator,
     PapagoTranslator,
+    CaiyunTranslator,
     OpenAICompatTranslator,
 )
 
@@ -30,6 +31,7 @@ TRANSLATOR_MAP: Dict[str, Type[Translator]] = {
     "jisho": JishoTranslator,
     "babelfish": BabelfishTranslator,
     "papago": PapagoTranslator,
+    "caiyun": CaiyunTranslator,
     "openai": OpenAICompatTranslator,
 }
 
@@ -44,10 +46,11 @@ DISPLAY_NAMES = {
     "jisho": "Jisho",
     "babelfish": "Babelfish",
     "papago": "Papago",
+    "caiyun": "Caiyun",
     "openai": "OpenAI",
 }
 
-DEFAULT_ENABLED = ["google", "bing", "deepl", "yandex", "wwwjdic", "jisho", "babelfish", "papago"]
+DEFAULT_ENABLED = ["google", "bing", "deepl", "yandex", "wwwjdic", "jisho", "babelfish", "papago", "caiyun"]
 
 
 def make_translator(name: str, cfg: AppConfig | None = None) -> Translator:
@@ -64,6 +67,10 @@ def make_translator(name: str, cfg: AppConfig | None = None) -> Translator:
             api_key=getattr(cfg, "openai_api_key", "") if cfg else "",
             model=getattr(cfg, "openai_model", "gpt-4o-mini") if cfg else "gpt-4o-mini",
             system_prompt=getattr(cfg, "openai_system_prompt", "") or OpenAICompatTranslator.__init__.__kwdefaults__["system_prompt"],  # type: ignore
+        )
+    if key == "caiyun":
+        return CaiyunTranslator(
+            api_key=(getattr(cfg, "caiyun_api_key", "") if cfg else "") or ""
         )
     return cls()
 

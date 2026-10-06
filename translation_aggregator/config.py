@@ -80,6 +80,9 @@ class AppConfig:
 
     wwwjdic_mirror: str = "https://www.edrdg.org/cgi-bin/wwwjdic/wwwjdic"
 
+    # defaults to the test token from the official docs; replace with your own
+    caiyun_api_key: str = "3975l6lr5pcbvidl6jl2"
+
     openai_base_url: str = "https://api.openai.com/v1"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
