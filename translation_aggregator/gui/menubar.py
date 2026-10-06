@@ -176,6 +176,12 @@ def _tools_menu(win, bar):
 
     m.addSeparator()
 
+    act = QAction("Install Playwright (Baidu engine)…", win)
+    act.triggered.connect(win._install_playwright_dialog)
+    m.addAction(act)
+
+    m.addSeparator()
+
     act = QAction("History Back", win)
     act.setShortcut(QKeySequence("Alt+Left"))
     act.triggered.connect(win._history_back)

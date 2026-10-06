@@ -13,12 +13,39 @@ import httpx
 
 from ..base import Translator, Language, TranslationResult
 
-# Detect if Playwright is available (optional browser backend)
-try:
-    import playwright  # noqa: F401
-    _PLAYWRIGHT_AVAILABLE = True
-except Exception:
-    _PLAYWRIGHT_AVAILABLE = False
+# Playwright is an optional backend and can be installed while the app is
+# running (the GUI offers it from the Tools menu), so detect it per call
+# instead of once at import time.
+def _playwright_available() -> bool:
+    try:
+        import playwright  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
+def playwright_status() -> tuple[bool, bool]:
+    """(playwright module installed, chromium browser downloaded).
+
+    The browser check is a filesystem heuristic over Playwright's cache
+    directory; the install command is idempotent either way.
+    """
+    module_ok = _playwright_available()
+    chromium_ok = False
+    if module_ok:
+        import os
+        from pathlib import Path
+        for base in (
+            os.environ.get("LOCALAPPDATA"),
+            str(Path.home() / ".cache"),
+        ):
+            if not base:
+                continue
+            cache = Path(base) / "ms-playwright"
+            if cache.is_dir() and any(cache.glob("chromium*")):
+                chromium_ok = True
+                break
+    return module_ok, chromium_ok
 
 
 class BaiduTranslator(Translator):
@@ -65,7 +92,7 @@ class BaiduTranslator(Translator):
 
         # If Playwright is available, use the real browser path (this is the reliable way
         # to use the exact mtpe-individual/transText endpoint the user confirmed works).
-        if _PLAYWRIGHT_AVAILABLE:
+        if _playwright_available():
             try:
                 out = _baidu_playwright_fetch(text, lang_param)
                 return TranslationResult(self.name, src_code, dst_code, out)
@@ -332,8 +359,14 @@ def _baidu_playwright_fetch(text: str, lang_param: str, timeout_ms: int = 25000)
     try:
         import playwright  # noqa: F401
     except Exception as e:
+        import sys as _sys
+        hint = (
+            "Use Tools > Install Playwright in the app to set it up."
+            if not getattr(_sys, "frozen", False)
+            else "The portable build cannot self-install it; use the pip install of the app."
+        )
         raise RuntimeError(
-            "Playwright is not installed. Install with: pip install playwright && playwright install chromium"
+            f"Playwright is not installed. {hint}"
         ) from e
     return _BAIDU_PW_WORKER.translate(text, lang_param, timeout_ms)
 

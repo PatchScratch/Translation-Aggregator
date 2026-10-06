@@ -1607,6 +1607,10 @@ class MainWindow(QWidget):
         except Exception:
             pass
 
+    def _install_playwright_dialog(self):
+        from .install_playwright import InstallPlaywrightDialog
+        InstallPlaywrightDialog(self).exec()
+
     def _about_dialog(self):
         from PyQt6.QtWidgets import QMessageBox
         try:
