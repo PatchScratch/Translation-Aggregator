@@ -724,7 +724,25 @@ class MainWindow(QWidget):
         self.btn_translate.clicked.connect(self._on_translate_clicked)
         top.addWidget(self.btn_translate, 0)
 
+        # Active toggle for automatic clipboard translation (original TA style)
+        self.chk_clip = QCheckBox("Auto Clipboard")
+        self.chk_clip.setToolTip("Watch the clipboard and translate new text automatically")
+        self.chk_clip.setChecked(bool(getattr(config, "auto_clipboard", False)))
+        self.chk_clip.toggled.connect(self._set_auto_clipboard)
+        top.addWidget(self.chk_clip, 0)
+
         root.addLayout(top)
+
+        # Sync the watcher state with the checkbox; do not fire on whatever
+        # is already in the clipboard at startup.
+        self.auto_clip = self.chk_clip.isChecked()
+        try:
+            self.last_clipboard = QApplication.clipboard().text() or ""
+        except Exception:
+            self.last_clipboard = ""
+        self.clipboard_watcher.setInterval(400)
+        if self.auto_clip:
+            self.clipboard_watcher.start()
 
         # Content area uses nested splitters (vertical for src vs columns, horizontal for columns)
         self.content_splitter = QSplitter(Qt.Orientation.Vertical)
@@ -970,8 +988,25 @@ class MainWindow(QWidget):
             if edit:
                 edit.setPlainText(str(e))
 
+    def _set_auto_clipboard(self, state: bool):
+        """Toggle automatic clipboard translation on/off."""
+        self.auto_clip = bool(state)
+        try:
+            self.config.auto_clipboard = bool(state)
+            self.config.save()
+        except Exception:
+            pass
+        if self.auto_clip:
+            try:
+                self.last_clipboard = QApplication.clipboard().text() or ""
+            except Exception:
+                self.last_clipboard = ""
+            self.clipboard_watcher.start()
+        else:
+            self.clipboard_watcher.stop()
+
     def _check_clipboard(self):
-        """Auto-clipboard watcher: feeds JParser only."""
+        """Auto-clipboard watcher: feed new clipboard text to everything."""
         try:
             clip = QApplication.clipboard().text()
         except Exception:
@@ -985,8 +1020,8 @@ class MainWindow(QWidget):
             if getattr(self, "src_edit", None):
                 self.src_edit.setPlainText(clip)
         except Exception:
-            pass
-        self._refresh_jparser_from_source()
+            return
+        self._on_translate_clicked()
 
     def _load_translators(self):
         """Stub: real implementation populates self.translators from config."""

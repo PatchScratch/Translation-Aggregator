@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import QApplication, QPushButton, QSplitter
 
 from ..engines import TRANSLATOR_MAP, make_translator, DISPLAY_NAMES
 from .config_dialog import ConfigDialog
+from .engine_config_dialog import ENGINE_CONFIG_DIALOGS
 from .window import MainWindow, TranslatorPane
 
 
@@ -46,6 +47,7 @@ class Stage1Window(MainWindow):
         self._engine_keys: list[str] = []
         self._thread = None
         self._worker = None
+        self._queued_text = None
         self._add_settings_button()
         self._hide_atlas()
         self._load_web_engines()
@@ -103,12 +105,29 @@ class Stage1Window(MainWindow):
                 continue
             self._engine_keys.append(key)
             title = DISPLAY_NAMES.get(key, key)
-            pane = TranslatorPane(title)
+            has_settings = key in ENGINE_CONFIG_DIALOGS
+            pane = TranslatorPane(
+                title,
+                show_settings=has_settings,
+                on_settings=(lambda k=key: self._open_engine_settings(k)) if has_settings else None,
+            )
             pane._engine_key = key
             pane._engine = None
             self.panes[title] = pane
             self._register_pane(pane)
         self._refresh_grid_layout()
+
+    def _open_engine_settings(self, key: str):
+        """Open the settings dialog for one engine's pane (gear button)."""
+        dlg_cls = ENGINE_CONFIG_DIALOGS.get(key)
+        if dlg_cls is None:
+            return
+        dlg = dlg_cls(self, self.config)
+        if dlg.exec():
+            self.config.save()
+            # Engines are built from config on every translate run
+            # (make_translator in the worker), so the new values apply
+            # on the next translation without rebuilding the panes.
 
     def _refresh_grid_layout(self):
         split = getattr(self, "columns_splitter", None)
@@ -167,7 +186,11 @@ class Stage1Window(MainWindow):
 
     def _on_translate_clicked(self):
         if self._thread is not None and self._thread.isRunning():
+            # Busy: remember the latest text and translate it when this run
+            # finishes, so fast clipboard changes are not dropped.
+            self._queued_text = self.src_edit.toPlainText().strip()
             return
+        self._queued_text = None
         self._refresh_jparser_from_source()
         self._refresh_mecab_from_source()
         text = ""
@@ -212,6 +235,11 @@ class Stage1Window(MainWindow):
         self.btn_translate.setEnabled(True)
         self._thread = None
         self._worker = None
+        queued = getattr(self, "_queued_text", None)
+        self._queued_text = None
+        if queued:
+            # A newer text arrived while the last run was in flight
+            self._on_translate_clicked()
 
     def _refresh_atlas_from_source(self):
         return
