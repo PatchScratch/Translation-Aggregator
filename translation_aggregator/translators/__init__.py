@@ -8,6 +8,8 @@ from .jisho import JishoTranslator
 from .babelfish import BabelfishTranslator
 from .papago import PapagoTranslator
 from .caiyun import CaiyunTranslator
+from .systran import SystranTranslator
+from .babylon import BabylonTranslator
 from .openai_compat import OpenAICompatTranslator
 
 __all__ = [
@@ -22,5 +24,7 @@ __all__ = [
     "BabelfishTranslator",
     "PapagoTranslator",
     "CaiyunTranslator",
+    "SystranTranslator",
+    "BabylonTranslator",
     "OpenAICompatTranslator",
 ]
