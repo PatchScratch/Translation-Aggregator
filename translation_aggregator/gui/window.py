@@ -1377,6 +1377,22 @@ class MainWindow(QWidget):
             idx = max(0, min(n - 1, int(rel.x() / width * n)))
             self.move_pane_to_column(pane.name, idx)
 
+    def _close_float_windows(self):
+        """Close every tear-off window, detaching its pane safely first.
+
+        A float window deleted with the pane still inside takes the pane
+        with it, and stale entries in floating_panes make _ensure_layout_
+        state treat the pane's name as permanently floating.
+        """
+        for fw in list(self.floating_panes.values()):
+            pane = fw._pane
+            fw._redock = False
+            fw._pane = None
+            if pane is not None:
+                pane.setParent(None)
+            fw.close()
+        self.floating_panes.clear()
+
     def float_pane(self, pane: TranslatorPane):
         if pane.name in self.floating_panes:
             return
@@ -1432,9 +1448,7 @@ class MainWindow(QWidget):
             self.config.save()
         except Exception:
             pass
-        for fw in list(self.floating_panes.values()):
-            fw._redock = False
-            fw.close()
+        self._close_float_windows()
         super().closeEvent(event)
 
     def _apply_jparser_font_sizes(self):

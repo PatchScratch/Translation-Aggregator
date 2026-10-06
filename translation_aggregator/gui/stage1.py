@@ -68,6 +68,13 @@ class Stage1Window(MainWindow):
         if not dlg.exec():
             return
         self.config.save()
+        self._rebuild_engine_panes()
+
+    def _rebuild_engine_panes(self):
+        # Tear-off windows must go first: their panes rejoin the rebuild,
+        # and a stale floating_panes entry would make the fresh pane with
+        # the same name unplaceable in any column.
+        self._close_float_windows()
         keep = {getattr(self, "jpane", None), getattr(self, "mpane", None)}
         keep.discard(None)
         for pane in list(self.grid_order):

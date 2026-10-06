@@ -423,7 +423,12 @@ class JParser:
         if not remove_map:
             return
 
+        # One shared copy per (entry, verb type): the same dictionary entry
+        # reaches many stem buckets (writings/readings, several suffixes), and
+        # materialising a fresh dict for each hit ballooned the dictionary to
+        # 15M objects (~3 GB); sharing keeps one object per real combination.
         to_add: Dict[str, List[dict]] = {}
+        memo: Dict[Tuple[int, int], dict] = {}
         for surf, elist in list(self.entries.items()):
             for e in elist:
                 for vt_idx, suf in remove_map:
@@ -431,8 +436,12 @@ class JParser:
                     if sl and surf.endswith(suf):
                         stem = surf[:-sl]
                         if stem:
-                            ne = dict(e)
-                            ne['_verb_type'] = vt_idx
+                            key = (id(e), vt_idx)
+                            ne = memo.get(key)
+                            if ne is None:
+                                ne = dict(e)
+                                ne['_verb_type'] = vt_idx
+                                memo[key] = ne
                             to_add.setdefault(stem, []).append(ne)
         for stem, elist in to_add.items():
             bucket = self.entries.setdefault(stem, [])
@@ -440,21 +449,17 @@ class JParser:
                 if not any(x.get('_verb_type') == ne.get('_verb_type') and x.get('reading') == ne.get('reading') for x in bucket):
                     bucket.append(ne)
 
-        # Also handle verb types whose Remove has empty suffix (vs, vs-i, vs-s etc.).
-        # In that case the surface *itself* is a valid stem (no stripping).
+        # Also handle verb types whose Remove has empty suffix (vs, vs-i, vs-s
+        # etc.): the surface *itself* is a valid stem (no stripping). Instead
+        # of stamping a verb-typed copy of every entry (which tripled the
+        # dictionary), record the types and let _find_matches run the same
+        # FindVerbMatches extension from the base entry.
+        self._empty_stem_verb_types = []
         for vt_idx, vt in enumerate(self.verb_types, 1):
             for c in vt.get('conjugations', []):
                 if self._tense_id(c.get('tense', '')) == vt.get('remove_tense', TENSE_NON_PAST) and not c.get('formal') and not c.get('negative'):
                     if c.get('suffix', '') == '':
-                        for surf, elist in list(self.entries.items()):
-                            for e in elist:
-                                if e.get('_verb_type') == vt_idx:
-                                    continue
-                                ne = dict(e)
-                                ne['_verb_type'] = vt_idx
-                                bucket = self.entries.setdefault(surf, [])
-                                if not any(x.get('_verb_type') == vt_idx and x.get('reading') == ne.get('reading') for x in bucket):
-                                    bucket.append(ne)
+                        self._empty_stem_verb_types.append(vt_idx)
                     break
 
     def _dedupe_entries(self):
@@ -700,8 +705,14 @@ class JParser:
                 # If this surface was tagged at load time with a verbType (like CreateDict does),
                 # call the *exact* FindVerbMatches port on the tail after this base length.
                 vtype = e.get('_verb_type') or 0
-                if vtype:
-                    vms = self._find_verb_matches(s, length, vtype, 0, inex)
+                vtypes = [vtype] if vtype else []
+                # empty-stem verb types (vs/vs-i/...): the base surface is
+                # already a valid stem, so extend from it as well
+                for svt in getattr(self, '_empty_stem_verb_types', []) or []:
+                    if svt not in vtypes:
+                        vtypes.append(svt)
+                for vts in vtypes:
+                    vms = self._find_verb_matches(s, length, vts, 0, inex)
                     for vm in vms:
                         vm.start = start
                         vm.reading = rd
