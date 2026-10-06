@@ -28,7 +28,7 @@ TRANSLATOR_MAP: Dict[str, Type[Translator]] = {
 }
 
 DISPLAY_NAMES = {
-    "google": "Google",
+    "google": "Google Translate",
     "bing": "Bing",
     "deepl": "DeepL",
     "baidu": "Baidu",
