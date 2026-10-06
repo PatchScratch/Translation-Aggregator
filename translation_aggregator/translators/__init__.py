@@ -6,6 +6,7 @@ from .yandex import YandexTranslator
 from .wwwjdic import WwwjdicTranslator
 from .jisho import JishoTranslator
 from .babelfish import BabelfishTranslator
+from .papago import PapagoTranslator
 from .openai_compat import OpenAICompatTranslator
 
 __all__ = [
@@ -18,5 +19,6 @@ __all__ = [
     "WwwjdicTranslator",
     "JishoTranslator",
     "BabelfishTranslator",
+    "PapagoTranslator",
     "OpenAICompatTranslator",
 ]
