@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QCheckBox, QLabel, QLineEdit,
-    QDialogButtonBox, QGroupBox,
+    QDialogButtonBox, QGroupBox, QComboBox,
 )
 
 from ..config import AppConfig
 from ..engines import DISPLAY_NAMES, TRANSLATOR_MAP
+from .theme import SCHEMES, SCHEME_LABELS
 
 
 class ConfigDialog(QDialog):
@@ -31,8 +32,19 @@ class ConfigDialog(QDialog):
         self.cb_sub.setChecked(self.cfg.enable_substitutions)
         self.cb_hira = QCheckBox("Auto convert romaji to hiragana when source is Japanese")
         self.cb_hira.setChecked(self.cfg.auto_hiragana)
+        scheme_row = QVBoxLayout()
+        scheme_row.addWidget(QLabel("Color scheme"))
+        self.combo_scheme = QComboBox()
+        for s in SCHEMES:
+            self.combo_scheme.addItem(SCHEME_LABELS[s], s)
+        current = getattr(self.cfg, "gui_color_scheme", "system")
+        if current not in SCHEMES:
+            current = "system"
+        self.combo_scheme.setCurrentIndex(SCHEMES.index(current))
+        scheme_row.addWidget(self.combo_scheme)
         l1.addWidget(self.cb_sub)
         l1.addWidget(self.cb_hira)
+        l1.addLayout(scheme_row)
         layout.addWidget(g1)
 
         g3 = QGroupBox("Translators")
@@ -63,6 +75,7 @@ class ConfigDialog(QDialog):
     def accept(self):
         self.cfg.enable_substitutions = self.cb_sub.isChecked()
         self.cfg.auto_hiragana = self.cb_hira.isChecked()
+        self.cfg.gui_color_scheme = self.combo_scheme.currentData() or "system"
         enabled = [n for n, cb in self.trans_checks.items() if cb.isChecked()]
         self.cfg.enabled_translators = enabled or ["google"]
         self.cfg.dictionaries_dir = self.dict_dir.text().strip() or "dictionaries"

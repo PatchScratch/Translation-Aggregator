@@ -68,6 +68,7 @@ class Stage1Window(MainWindow):
         if not dlg.exec():
             return
         self.config.save()
+        self.refresh_theme()
         self._rebuild_engine_panes()
 
     def _rebuild_engine_panes(self):

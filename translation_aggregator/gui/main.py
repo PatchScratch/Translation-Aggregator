@@ -5,10 +5,14 @@ from PyQt6.QtGui import QPalette, QColor
 import sys
 
 from .stage1 import Stage1Window
+from ..config import config
+from . import theme
 
 
 def main():
     app = QApplication(sys.argv)
+
+    theme.apply_theme(getattr(config, "gui_color_scheme", "system"))
 
     pal = app.palette()
     pal.setColor(QPalette.ColorRole.ToolTipText, QColor("black"))

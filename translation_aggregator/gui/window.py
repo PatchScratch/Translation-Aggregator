@@ -327,6 +327,7 @@ from ..mecab import MecabWrapper
 from ..atlas import AtlasEngine
 from ..config import config
 from ..history import HistoryStore
+from . import theme
 
 
 TRANSLATOR_MAP = {
@@ -531,7 +532,7 @@ class TranslatorPane(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         # Visible border so the edges of each pane are clear and draggable via the splitter handles next to them
-        self.setStyleSheet("TranslatorPane { border: 1px solid #555; background-color: #2b2b2b; }")
+        self.setStyleSheet(theme.pane_qss())
 
         # Also allow clicking the label area to select
         self.label.mousePressEvent = self._label_clicked
@@ -564,7 +565,7 @@ class TranslatorPane(QWidget):
 
     def set_selected(self, selected: bool):
         self._selected = selected
-        self.setStyleSheet("")
+        self.setStyleSheet(theme.pane_qss())
         if self.name in ("JParser", "MeCab", "ATLAS"):
             self.label.setText(self.name)
             self.close_btn.hide()
@@ -742,9 +743,7 @@ class _PaneFloatWindow(QWidget):
             Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.setStyleSheet(
-            "_PaneFloatWindow { border: 1px solid #555; background-color: #2b2b2b; }"
-        )
+        self.setStyleSheet(theme.float_window_qss())
         self._pane = pane
         self._mw = main_window
         self._redock = True
@@ -1376,6 +1375,14 @@ class MainWindow(QWidget):
             rel = self.columns_splitter.mapFromGlobal(gpos)
             idx = max(0, min(n - 1, int(rel.x() / width * n)))
             self.move_pane_to_column(pane.name, idx)
+
+    def refresh_theme(self):
+        """Re-apply the color scheme and restyle every pane."""
+        theme.apply_theme(getattr(self.config, "gui_color_scheme", "system"))
+        for p in self.pane_list:
+            p.setStyleSheet(theme.pane_qss())
+        for fw in self.floating_panes.values():
+            fw.setStyleSheet(theme.float_window_qss())
 
     def _close_float_windows(self):
         """Close every tear-off window, detaching its pane safely first.

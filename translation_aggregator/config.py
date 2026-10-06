@@ -70,6 +70,7 @@ class AppConfig:
     )
 
     gui_columns: int = 2
+    gui_color_scheme: str = "system"  # system | light | dark
 
     deepl_mode: str = "free"
     deepl_api_key: str = ""
