@@ -365,7 +365,11 @@ class TranslatorPane(QWidget):
             )
             self.gear_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             if on_settings:
-                self.gear_btn.clicked.connect(on_settings)
+                # clicked(checked) passes the checked state as an argument;
+                # drop it so no-arg slots and key-bound lambdas get called
+                # with their own arguments (otherwise the checked bool lands
+                # in the first parameter and the dialog never opens)
+                self.gear_btn.clicked.connect(lambda *args: on_settings())
             hl.addWidget(self.gear_btn)
 
         hl.addStretch(1)
