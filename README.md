@@ -86,7 +86,16 @@ are for the CLI and the Settings dialog.
 
 ## Install
 
-Requires Python 3.9+ (3.11+ recommended). Windows, Linux, or macOS.
+**Prebuilt downloads** (no Python needed): the
+[releases page](https://github.com/PatchScratch/Translation-Aggregator/releases)
+carries a Windows build (`TranslationAggregator-x.y.z-win64.exe`) and a
+Linux AppImage (`TranslationAggregator-x.y.z-x86_64.AppImage` — make it
+executable and run; `--cli` inside the AppImage runs the command line
+tool). In the portable builds the optional Playwright backend cannot
+self-install — use the pip installation below for the Baidu engine.
+
+Or install from source. Requires Python 3.9+ (3.11+ recommended).
+Windows, Linux, or macOS.
 
 ```bash
 git clone https://github.com/PatchScratch/Translation-Aggregator

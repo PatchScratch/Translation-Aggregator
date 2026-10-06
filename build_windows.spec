@@ -63,6 +63,7 @@ exe_gui = EXE(
     console=False,
     disable_windowed_traceback=False,
     upx=False,
+    icon=str(ROOT / "assets" / "icon.ico"),
 )
 
 cli = Analysis(

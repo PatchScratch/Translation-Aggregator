@@ -1,0 +1,9 @@
+# Installed into the AppImage by python-appimage. local+X copies the
+# package from the build environment (the build venv editable-installs
+# the app and installs PyQt6, whose Qt6 runtime and sip modules live in
+# the same PyQt6 package directory and travel with it).
+local+translation_aggregator
+local+PyQt6
+httpx>=0.24
+requests>=2.28
+platformdirs>=3.0

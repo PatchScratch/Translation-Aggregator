@@ -17,7 +17,14 @@ from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QPlainTextEdit, QPushButton, QHBoxLayout,
 )
 
+import os
+
 from ..translators.baidu import playwright_status
+
+
+def _readonly_install() -> bool:
+    """True when the app cannot pip-install into itself (portable builds)."""
+    return bool(getattr(sys, "frozen", False) or os.environ.get("APPIMAGE"))
 
 
 class _InstallThread(QThread):
@@ -71,10 +78,11 @@ class InstallPlaywrightDialog(QDialog):
         layout = QVBoxLayout(self)
         module_ok, chromium_ok = playwright_status()
 
-        if getattr(sys, "frozen", False):
+        if _readonly_install():
             layout.addWidget(QLabel(
-                "This is the portable build, which bundles everything it can "
-                "and has no Python package installer inside.\n\n"
+                "This is a portable build (single-file exe / AppImage), which "
+                "bundles everything it can and cannot install Python packages "
+                "into itself.\n\n"
                 "The Baidu (Playwright) engine is only available in the "
                 "pip installation of the app:\n\n"
                 "    pip install -e \".[browser]\"\n"

@@ -1,0 +1,57 @@
+name: Build Linux AppImage
+
+# Builds the AppImage inside a manylinux_2_28 container (the glibc base
+# Qt 6 requires) and smoke-tests it, on every tag (v*) and on demand.
+# The result attaches to the matching GitHub release.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build AppImage (manylinux_2_28 container)
+        run: |
+          mkdir -p dist
+          docker run --rm -v "$PWD:/src" quay.io/pypa/manylinux_2_28_x86_64 \
+            /src/packaging/appimage/build.sh
+
+      - name: Smoke test (CLI + headless GUI)
+        run: |
+          docker run --rm -v "$PWD:/src" quay.io/pypa/manylinux_2_28_x86_64 bash -c '
+            set -e
+            dnf install -y -q libxkbcommon libxkbcommon-x11 mesa-libGL mesa-libGLU \
+              mesa-libEGL fontconfig libxcb libX11 glib2 expat libxslt
+            cd /tmp
+            cp /src/dist/TranslationAggregator-x86_64.AppImage ta.AppImage
+            chmod +x ta.AppImage && ./ta.AppImage --appimage-extract >/dev/null
+            ./squashfs-root/AppRun --cli "今日は良い天気ですね" -s ja -d en \
+              --translators google | grep -q "\[Google" && echo "CLI OK"
+            QT_QPA_PLATFORM=offscreen timeout 35 ./squashfs-root/AppRun >/tmp/gui.log 2>&1 &
+            sleep 25
+            if kill -0 $! 2>/dev/null; then echo "GUI OK"; kill %1; else
+              echo "GUI DIED"; tail -20 /tmp/gui.log; exit 1; fi'
+
+      - name: Rename with version
+        run: |
+          VER="${GITHUB_REF_NAME:-dev}"
+          mv dist/TranslationAggregator-x86_64.AppImage "dist/TranslationAggregator-$VER-x86_64.AppImage"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-appimage
+          path: dist/*.AppImage
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.ref_name }}" dist/*.AppImage --clobber

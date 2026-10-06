@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=TranslationAggregator
+Exec=TranslationAggregator
+Comment=Translate text through many engines in parallel
+Icon=TranslationAggregator
+Categories=Utility;Translation;
+Terminal=false

@@ -151,10 +151,17 @@ class AppConfig:
 
 config = AppConfig.load()
 
-# Frozen (PyInstaller) builds bundle the dictionaries inside the exe;
-# resolve the default relative dictionary directory to them. An absolute
-# path or an explicitly configured directory always wins.
-if getattr(sys, "frozen", False) and config.dictionaries_dir == "dictionaries":
-    _bundled = Path(getattr(sys, "_MEIPASS", "")) / "dictionaries"
-    if _bundled.is_dir():
-        config.dictionaries_dir = str(_bundled)
+# Frozen (PyInstaller) builds and AppImages bundle the dictionaries with
+# the application; resolve the default relative dictionary directory to
+# them. An absolute path or an explicitly configured directory always wins.
+if config.dictionaries_dir == "dictionaries":
+    import os
+    _base = None
+    if getattr(sys, "frozen", False):
+        _base = getattr(sys, "_MEIPASS", "")
+    elif os.environ.get("APPDIR"):
+        _base = os.environ["APPDIR"]  # set by the AppImage AppRun
+    if _base:
+        _bundled = Path(_base) / "dictionaries"
+        if _bundled.is_dir():
+            config.dictionaries_dir = str(_bundled)

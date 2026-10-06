@@ -359,11 +359,13 @@ def _baidu_playwright_fetch(text: str, lang_param: str, timeout_ms: int = 25000)
     try:
         import playwright  # noqa: F401
     except Exception as e:
+        import os
         import sys as _sys
+        portable = getattr(_sys, "frozen", False) or os.environ.get("APPIMAGE")
         hint = (
-            "Use Tools > Install Playwright in the app to set it up."
-            if not getattr(_sys, "frozen", False)
-            else "The portable build cannot self-install it; use the pip install of the app."
+            "The portable build cannot self-install it; use the pip install of the app."
+            if portable
+            else "Use Tools > Install Playwright in the app to set it up."
         )
         raise RuntimeError(
             f"Playwright is not installed. {hint}"
