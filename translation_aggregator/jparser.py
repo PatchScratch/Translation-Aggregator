@@ -6,6 +6,7 @@ import gzip
 import json
 import os
 import re
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
@@ -546,6 +547,11 @@ class JParser:
     def _load_dictionaries(self):
         self.entries.clear()
         if not self.dict_dir.exists():
+            print(
+                f"JParser: dictionary directory not found: {self.dict_dir} "
+                "(pane will stay empty; set dictionaries_dir or download edict2)",
+                file=sys.stderr,
+            )
             return
         files = sorted(self.dict_dir.iterdir())
         plain_names = {f.name for f in files if f.is_file()}

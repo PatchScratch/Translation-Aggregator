@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Dict, List, Any
@@ -111,6 +112,10 @@ class AppConfig:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         data = asdict(self)
         data.pop("path", None)
+        if data.get("dictionaries_dir") == _RUNTIME_DICT_DIR:
+            # Never persist the bundled directory resolved for this run —
+            # frozen builds extract it to a fresh _MEI temp folder per launch.
+            data["dictionaries_dir"] = "dictionaries"
         if self.path.suffix.lower() == ".json":
             self.path.write_text(json.dumps(data, indent=2), encoding="utf-8")
         else:
@@ -151,10 +156,31 @@ class AppConfig:
 
 config = AppConfig.load()
 
+
+def _in_temp_dir(path: str) -> bool:
+    """True if path lives under the OS temp dir — PyInstaller's _MEIxxxxxx
+    extraction folders and AppImage .mountxxxx mounts live there and are
+    deleted after each run, so a configured dictionaries_dir pointing into
+    one is always stale on the next launch."""
+    try:
+        p = Path(path).resolve()
+        t = Path(tempfile.gettempdir()).resolve()
+        return t == p or t in p.parents
+    except Exception:
+        return False
+
+
 # Frozen (PyInstaller) builds and AppImages bundle the dictionaries with
 # the application; resolve the default relative dictionary directory to
 # them. An absolute path or an explicitly configured directory always wins.
-if config.dictionaries_dir == "dictionaries":
+_RUNTIME_DICT_DIR = ""  # bundled dir resolved for this run; never persisted
+def _needs_dict_rebind(path: str) -> bool:
+    # A configured path under the temp tree that has vanished is a leftover
+    # _MEI/.mount path persisted by an earlier run — rebind it. A directory
+    # that still exists (even in temp) is a deliberate choice; keep it.
+    return _in_temp_dir(path) and not Path(path).exists()
+
+if config.dictionaries_dir == "dictionaries" or _needs_dict_rebind(config.dictionaries_dir):
     import os
     _base = None
     if getattr(sys, "frozen", False):
@@ -165,3 +191,8 @@ if config.dictionaries_dir == "dictionaries":
         _bundled = Path(_base) / "dictionaries"
         if _bundled.is_dir():
             config.dictionaries_dir = str(_bundled)
+            _RUNTIME_DICT_DIR = config.dictionaries_dir
+    elif _needs_dict_rebind(config.dictionaries_dir):
+        # Dead _MEI/.mount path from an earlier run and no bundle available
+        # (e.g. running from source): fall back to the relative default.
+        config.dictionaries_dir = "dictionaries"
