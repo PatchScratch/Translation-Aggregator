@@ -1,6 +1,6 @@
 [project]
 name = "translation-aggregator"
-version = "1.1.0"
+version = "1.1.1"
 description = "Cross-platform Python port of Translation Aggregator (web translators + JParser + MeCab + ATLAS via Wine)"
 readme = "README.md"
 requires-python = ">=3.9"
