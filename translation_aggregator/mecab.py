@@ -12,11 +12,39 @@ class MecabError(Exception):
     pass
 
 
+def _dict_dir() -> Optional[str]:
+    """Dictionary directory from a pip-installed dictionary package, if any.
+
+    The python bindings ship no dictionary; without -d they only work against
+    a system-wide MeCab install. Looked up in order: an importable
+    unidic_lite/ipadic package (pip install / the project's `mecab` extra),
+    then the dictionary the in-app "Install MeCab" tool unpacks into the
+    per-user extras directory.
+    """
+    for mod in ("unidic_lite", "ipadic"):
+        try:
+            m = __import__(mod)
+            dicdir = getattr(m, "DICDIR", None)
+            if dicdir and os.path.isdir(dicdir):
+                return dicdir
+        except Exception:
+            continue
+    from .extras import extras_dir
+
+    for pkg in ("unidic_lite", "ipadic"):
+        dicdir = extras_dir() / pkg / "dicdir"
+        if (dicdir / "sys.dic").exists():
+            return str(dicdir)
+    return None
+
+
 class MecabWrapper:
     """
     Cross platform MeCab wrapper.
-    Prefers mecab-python3 if available.
-    Falls back to calling 'mecab' executable.
+    Tries the mecab-python3 binding, then fugashi (installed by the in-app
+    "Install MeCab" tool into the extras dir on portable builds), and falls
+    back to calling the 'mecab' executable. All bindings produce the same
+    surface + feature-fields text consumed by parse_to_tokens.
     """
 
     def __init__(self, mecab_path: Optional[str] = None):
@@ -29,13 +57,25 @@ class MecabWrapper:
             # user gave explicit
             pass
 
-        # Try python binding first
+        dicdir = _dict_dir()
+
+        # Try the mecab-python3 binding first
         try:
             import MeCab  # type: ignore
 
-            # mecab-python3 exposes Tagger
-            self._mecab = MeCab.Tagger("")
-            # quick sanity
+            # quote: mecab splits its arg string on spaces, and paths often contain them
+            self._mecab = MeCab.Tagger(f'-d "{dicdir}"' if dicdir else "")
+            # quick sanity (fails when no dictionary is reachable)
+            _ = self._mecab.parse("test")
+            return
+        except Exception:
+            pass
+
+        # Then fugashi (same C library, wheels for current Pythons)
+        try:
+            import fugashi  # type: ignore
+
+            self._mecab = fugashi.Tagger(f'-d "{dicdir}"' if dicdir else "")
             _ = self._mecab.parse("test")
             return
         except Exception:
@@ -51,7 +91,7 @@ class MecabWrapper:
                 self._mecab_cmd = [c]  # default full output (surface + all feature fields) for faithful MeCab pane
                 return
 
-        raise MecabError("MeCab not found (install mecab or mecab-python3)")
+        raise MecabError("MeCab not found (use Tools > Install MeCab, or install mecab/fugashi)")
 
     def parse(self, text: str) -> str:
         """Return full MeCab output (surface + all feature fields). Faithful to original TA."""

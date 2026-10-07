@@ -91,8 +91,16 @@ are for the CLI and the Settings dialog.
 carries a Windows build (`TranslationAggregator-x.y.z-win64.exe`) and a
 Linux AppImage (`TranslationAggregator-x.y.z-x86_64.AppImage` — make it
 executable and run; `--cli` inside the AppImage runs the command line
-tool). In the portable builds the optional Playwright backend cannot
-self-install — use the pip installation below for the Baidu engine.
+tool).
+
+**MeCab in the portable builds:** the MeCab dictionary is large, so it is not
+bundled — the MeCab pane starts with a "not available" notice. Install it
+from inside the app: **Tools → Install MeCab (MeCab pane)…** downloads the
+tokenizer and the unidic-lite dictionary once per user (about 50 MB, stored
+outside the app next to its config, so it survives app updates) and the pane
+starts working on the next translation. In the portable builds the optional
+Playwright backend still cannot self-install — use the pip installation
+below for the Baidu engine.
 
 Or install from source. Requires Python 3.9+ (3.11+ recommended).
 Windows, Linux, or macOS.
@@ -112,7 +120,9 @@ transagg-gui
 ```
 
 Optional extras instead of `full`: `[gui]` (no MeCab/Playwright),
-`[mecab]`, `[browser]` (Playwright, only needed for the Baidu engine):
+`[mecab]`, `[browser]` (Playwright, only needed for the Baidu engine).
+The GUI's Tools menu can install MeCab at any time (same fugashi +
+unidic-lite packages, into the per-user extras directory):
 
 ```bash
 pip install -e ".[gui]"

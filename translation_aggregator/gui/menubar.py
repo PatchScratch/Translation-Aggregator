@@ -180,6 +180,10 @@ def _tools_menu(win, bar):
     act.triggered.connect(win._install_playwright_dialog)
     m.addAction(act)
 
+    act = QAction("Install MeCab (MeCab pane)…", win)
+    act.triggered.connect(win._install_mecab_dialog)
+    m.addAction(act)
+
     m.addSeparator()
 
     act = QAction("History Back", win)

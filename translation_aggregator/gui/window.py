@@ -1014,7 +1014,7 @@ class MainWindow(QWidget):
             return
         if not getattr(self, "mecab", None):
             if ruby:
-                ruby.set_tokens([("", "[MeCab not available]", "Install mecab or mecab-python3")])
+                ruby.set_tokens([("", "[MeCab not available]", "Use Tools > Install MeCab… (about 50 MB download, once per user)")])
             return
         try:
             raw_tokens = self.mecab.parse_to_tokens(text) or []
@@ -1463,6 +1463,13 @@ class MainWindow(QWidget):
             pass
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, self.topmost)
         self.show()
+        # flag changes re-create the native window on Windows; re-assert the
+        # icon or the taskbar falls back to a generic one
+        from PyQt6.QtWidgets import QApplication
+
+        app_icon = QApplication.instance().windowIcon()
+        if not app_icon.isNull():
+            self.setWindowIcon(app_icon)
 
     def _set_opacity(self, value: float):
         self.opacity = max(0.1, min(1.0, float(value)))
@@ -1610,6 +1617,19 @@ class MainWindow(QWidget):
     def _install_playwright_dialog(self):
         from .install_playwright import InstallPlaywrightDialog
         InstallPlaywrightDialog(self).exec()
+
+    def _install_mecab_dialog(self):
+        from .install_mecab import InstallMecabDialog
+        InstallMecabDialog(self).exec()
+        self._rebuild_mecab()
+
+    def _rebuild_mecab(self):
+        """Re-create the MeCab wrapper (e.g. after the in-app installer ran)."""
+        try:
+            self.mecab = MecabWrapper()
+        except Exception:
+            self.mecab = None
+        self._refresh_mecab_from_source()
 
     def _about_dialog(self):
         from PyQt6.QtWidgets import QMessageBox
