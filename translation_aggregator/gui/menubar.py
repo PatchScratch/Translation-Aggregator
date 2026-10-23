@@ -1,8 +1,10 @@
-"""Menu bar for the main window.
+"""Application menu for the main window.
 
-Ports the original C++ TA menu bar (File / View / Tools / Windows /
-Languages) with a modern presentation, minus the Windows-only process
-hooking entries that are out of scope for this port:
+Ports the original C++ TA menus (File / View / Tools / Help) with a modern
+presentation, minus the Windows-only process hooking entries that are out
+of scope for this port. Since the window is frameless (no native title bar
+or menu bar), the whole menu lives behind the hamburger button in the
+window chrome (see gui/chrome.py):
 
   File   Translate, Clear source, Quit
   View   Always on top, opacity, column count, lock pane order,
@@ -25,14 +27,16 @@ OPACITY_STEPS = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]
 GITHUB_URL = "https://github.com/PatchScratch/Translation-Aggregator"
 
 
-def build_menu_bar(win) -> QMenu:
-    from PyQt6.QtWidgets import QMenuBar
-    bar = QMenuBar(win)
-    _file_menu(win, bar)
-    _view_menu(win, bar)
-    _tools_menu(win, bar)
-    _help_menu(win, bar)
-    return bar
+def build_app_menu(win) -> QMenu:
+    """The classic menu bar content as one hamburger menu: File / View /
+    Tools / Help become its submenus. Actions are parented to the window so
+    their shortcuts keep working while the menu is closed."""
+    m = QMenu(win)
+    _file_menu(win, m)
+    _view_menu(win, m)
+    _tools_menu(win, m)
+    _help_menu(win, m)
+    return m
 
 
 def _file_menu(win, bar):

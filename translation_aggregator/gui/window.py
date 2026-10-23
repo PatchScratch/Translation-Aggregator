@@ -7,7 +7,7 @@ from PyQt6.QtGui import QTextCursor, QClipboard, QAction, QDrag, QPainter, QFont
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QToolBar, QPushButton,
     QLabel, QSplitter, QCheckBox, QApplication, QMenuBar, QMenu, QSizePolicy,
-    QMessageBox, QProgressDialog, QToolTip, QComboBox, QSizeGrip
+    QMessageBox, QProgressDialog, QToolTip, QComboBox, QSizeGrip, QToolButton
 )
 from PyQt6.QtGui import QPainter, QFont, QFontMetrics, QColor, QPen
 from PyQt6.QtCore import QRect
@@ -792,6 +792,10 @@ class MainWindow(QWidget):
         super().__init__()
         self.setWindowTitle("Translation Aggregator (Python)")
         self.resize(1100, 700)
+        # frameless: the custom chrome row (gui/chrome.py) replaces the title
+        # bar and menu bar; native drag/edge-resize/snap is kept alive by
+        # the WM_NCHITTEST handler below (Windows) or startSystemMove (else)
+        self.setWindowFlag(Qt.WindowType.FramelessWindowHint, True)
 
         self.config = config
         self.history = HistoryStore()
@@ -1451,6 +1455,63 @@ class MainWindow(QWidget):
             p.setStyleSheet(theme.pane_qss())
         for fw in self.floating_panes.values():
             fw.setStyleSheet(theme.float_window_qss())
+        chrome = getattr(self, "chrome", None)
+        if chrome is not None:
+            chrome.apply_theme()
+
+    # ---------- frameless window: native move/resize (Windows) ----------
+
+    def nativeEvent(self, eventType, message):
+        if eventType == b"windows_generic_MSG":
+            try:
+                import ctypes
+                from ctypes import wintypes
+
+                msg = wintypes.MSG.from_address(int(message))
+                if msg.message == 0x0084:  # WM_NCHITTEST
+                    x = ctypes.c_short(msg.lParam & 0xFFFF).value
+                    y = ctypes.c_short((msg.lParam >> 16) & 0xFFFF).value
+                    origin = self.mapToGlobal(QPoint(0, 0))
+                    ht = self._hit_test(x - origin.x(), y - origin.y())
+                    if ht is not None:
+                        return True, int(ht)
+            except Exception:
+                pass
+        return super().nativeEvent(eventType, message)
+
+    def _hit_test(self, x: int, y: int):
+        """Hit-test codes that keep the frameless window fully native:
+        edges resize, the chrome row drags (with snap/double-click maximize).
+        None means "client area" — Qt handles the event normally."""
+        border = 6
+        left = x < border
+        right = x >= self.width() - border
+        top = y < border
+        bottom = y >= self.height() - border
+        if not self.isMaximized():
+            if top and left:
+                return 0x0D  # HTTOPLEFT
+            if top and right:
+                return 0x0E  # HTTOPRIGHT
+            if bottom and left:
+                return 0x10  # HTBOTTOMLEFT
+            if bottom and right:
+                return 0x11  # HTBOTTOMRIGHT
+            if left:
+                return 0x0A  # HTLEFT
+            if right:
+                return 0x0B  # HTRIGHT
+            if top:
+                return 0x0C  # HTTOP
+            if bottom:
+                return 0x0F  # HTBOTTOM
+        chrome = getattr(self, "chrome", None)
+        if chrome is not None and 0 <= y < chrome.height():
+            child = self.childAt(QPoint(x, y))
+            if isinstance(child, QToolButton):
+                return None  # hamburger / window buttons take their clicks
+            return 0x01  # HTCAPTION: native drag, snap, double-click maximize
+        return None
 
     # ---------- menu actions (see gui/menubar.py) ----------
 

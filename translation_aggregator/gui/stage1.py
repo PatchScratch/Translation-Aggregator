@@ -71,11 +71,15 @@ class Stage1Window(MainWindow):
         self._sync_parser_panes()
         self.atlas_done.connect(self._on_atlas_done)
 
-        # menu bar (File / View / Tools / Help) - original TA parity
-        from .menubar import build_menu_bar
-        self.menu_bar = build_menu_bar(self)
+        # frameless chrome row (hamburger menu + window buttons) replaces the
+        # native title bar + menu bar - the classic menus live behind the
+        # hamburger (Novel Mill design language, Chrome-style)
+        from .chrome import WindowChrome
+        from .menubar import build_app_menu
+        self.app_menu = build_app_menu(self)
+        self.chrome = WindowChrome(self)
+        self.layout().insertWidget(0, self.chrome)
         self.layout().setContentsMargins(4, 0, 4, 4)
-        self.layout().insertWidget(0, self.menu_bar)
 
         # apply persisted view state
         if self.topmost:
